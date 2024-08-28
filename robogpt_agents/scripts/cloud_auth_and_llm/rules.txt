@@ -1,0 +1,45 @@
+## robot type
+- the robot is a 6dof robotic arm.
+
+## set_robot_ip
+- set_robot_ip should always be called before calling any other function. Its values should be a placeholder.
+- If multiple robots are used, the value of the IP address will be `robot_ip_list[0]` for the first robot, `robot_ip_list[1]` for the second robot, and so on.
+
+## get_zone_pose
+- if the function is being called, the argument for the zone_name should include the pose at the end and not include zone. For example, if prompt given is "move robot to home pose zone", the zone_name will be 'home pose'.
+
+## move_to_pose_moveit
+- Whenever, get_zone_pose is called, move_to_pose_moveit should be used. 
+- when zone_pose is used, run move_to_pose_moveit
+- Use move_to_pose_implementation when the user wants to move the end effector or the tool when length is specified.
+- The Y axis is pointing in front of robot, Z axis is pointing to the top and X axis is poining to the right of the robot. 
+- x axis denotes the left, right movement, z axis denotes the up, down movement and y axis denotes the forward, backward movement
+- For example, if the current pose is [0.3,0.2,0,0,0.1,0] and the robot needs to be moved 10 cm to the left, then the final pose would be [0.4,0.2,0,0,0.1,0].
+- For example, if the current pose is [0.3,0.2,0,0,0.1,0] and the robot needs to be moved 20 cm to the right, then the final pose would be [0.1,0.2,0,0,0.1,0].
+- For example, if the current pose is [0.3,0.5,0.2,0.1,0.1,0] and the robot needs to be moved up by 10 cm, then the final pose would be [0.3,0.5,0.3,0.1,0.1,0]
+- For example, if the current pose is [0.3,0.5,0.2,0.1,0.1,0] and the robot needs to be moved down by 10 cm, then the final pose would be [0.3,0.5,0.1,0.1,0.1,0]
+- For example, if the current pose is [0.4,0.3,0,0,0.1,0] and the robot needs to be moved 10 cm in forward, then the final pose would be [0.4,0.4,0,0,0.1,0]. 
+- For example, if the current pose is [0.4,0.3,0,0,0.1,0] and the robot needs to be moved 10 cm in backward, then the final pose would be [0.4,0.2,0,0,0.1,0]. 
+
+
+## move_to_joint
+- If only one joint or selected joints have to be moved, use `move_to_joint`. For example, to move the robot 90 degrees left.
+- Unless a user wants to manipulate the joints directly, never use `move_to_joint`.
+- For `move_to_joint`'s array, `[j1, j2, j3, j4, j5, j6]` should be used. The values should be in radians. Where `j1` is base, `j2` is shoulder, `j3` is elbow, `j4` is wrist1, `j5` is wrist2, `j6` is wrist3, and `j` stands for joint.
+
+## get_pose
+- the value returned by the function is of format [x,y,z,r,p,y] where x,y,z is the x axis, y axis and z axis position and r,p,y is the rotation of end effector
+- when end effector needs to be moved relative to current pose, add the appropraite translation in the x,y,z values
+
+
+## to interact with an object
+- use move_to_object_pose
+- object name in move_to_object_pose should always be a placeholder
+
+## control_gripper
+- The gripper can be turned on by setting `control_gripper` to True. The gripper can be turned off by setting `control_gripper` to False. For example, if the user wants to pick an object, then `control_gripper` should be set to True. If the user wants to place an object, then `control_gripper` should be set to False.
+- The gripper switch should never be a placeholder.
+- The switch in `func_n_params` should always be a boolean value. The value (true or false) should be automatically obtained from the user's intent.
+
+## General Notes
+- All data types should be standard Python data types. For example, float, int, str, `list[float]`.

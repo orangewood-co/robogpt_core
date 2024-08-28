@@ -1,0 +1,42 @@
+{
+    "object_detection_alg": [
+        "zero_shot"
+    ],
+    "camera_list": {
+        "204222062672": "10.42.0.53"
+    },
+    "objects_to_detect": [
+        "body-lotion", 
+        "coconut-oil", 
+        "hair-gel", 
+        "hair-serum"
+    ],
+    "available_drinks": [
+        "soda",
+        "whiskey",
+        "rum",
+        "vodka"
+    ],
+    "camera_config": {
+        "cam_top": {
+            "camera_index": "204222062672",
+            "model": "Intel RealSense D415",
+            "name": "Intel RealSense D415",
+            "serial": "204222062672",
+            "color_format": [
+                1280,
+                720,
+                15,
+                6
+            ],
+            "depth_format": [
+                1280,
+                720,
+                6,
+                1
+            ]
+        }
+    },
+    "velocity_scaling": 0.2,
+    "use_moveit": false
+}
