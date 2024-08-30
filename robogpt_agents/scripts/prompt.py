@@ -19,7 +19,7 @@ parser.add_argument('--setup', required=True, help='The setup to use for loading
 args = parser.parse_args()
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import core.cloud_auth_and_llm.test_demo_skills as test_skill
+import robogpt_agents.scripts.cloud_auth_and_llm as test_skill
 
 
 nlp = spacy.load('en_core_web_md')

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=owlRoboGPT
+Comment=A shell script to run RoboGPT
+Exec=/home/ow-labs/workspaces/robogpt/robogpt-core/setup/setup/start_robogpt.sh
+Icon=/home/ow-labs/workspaces/robogpt/robogpt-core/setup/setup/robot_inverted.png
+Terminal=true
+Type=Application
+Categories=Application;
