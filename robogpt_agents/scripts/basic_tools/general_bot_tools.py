@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import spacy  # type: ignore
 import random
 import numpy as np
@@ -30,7 +32,7 @@ from moveit_msgs.msg import CollisionObject
 from shape_msgs.msg import SolidPrimitive
 from pydantic import BaseModel, Field
 from tf.transformations import quaternion_from_euler, quaternion_matrix, translation_matrix, euler_matrix, euler_from_matrix
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import utils
 
 # -----------------------------------------------------------------------------
 #                         INITIALIZERS
@@ -41,22 +43,23 @@ nlp = spacy.load("en_core_web_md")
 
 # Define file paths for configuration and results
 
-robot_home_file_path = "robogpt_v3/robogpt_config/robot_config/robot_pose.json"
-robotgpt_config = "robogpt_v3/robogpt_config/robot_config/robogpt.json"
-tool_path = "robogpt_v3/robogpt_config/tools_config/tool_list.json"
-
-# -----------------------------------------------------------------------------
-# Loading the robot wrappers
+base_dir = f"/home/{os.getlogin()}/orangewood_ws/src"
+sys.path.append(base_dir)
+robot_home_file_path = os.path.join(base_dir,"robogpt_v3/robogpt_config/robot_config/robot_pose.json")
+robotgpt_config = os.path.join(base_dir,"robogpt_v3/robogpt_config/robot_config/robogpt.json")
+tool_path = os.path.join(base_dir,"robogpt_v3/robogpt_config/tools_config/tool_list.json")
 
 robot_model = rospy.get_param('/robot_model', default="")
-robot_model = "sim"
+robot_model = "sim" 
+
 try:
-    wrapper_path = f'/robot_drivers/{robot_model}/wrapper'
+    wrapper_path = f'robot_drivers.{robot_model}.wrapper.bot_wrapper'
     bot_control = importlib.import_module(wrapper_path)
+    wrapper = getattr(bot_control, 'bot_wrapper')
 
 except Exception as err:
     print("Could not load robot due to ",err)
-    send_msg(message="Error in  loading Robot. Please check the Robot Model")
+    utils.send_msg(message="Error in  loading Robot. Please check the Robot Model")
 
 # -----------------------------------------------------------------------------
 
@@ -67,7 +70,6 @@ except Exception as err:
 # -----------------------------------------------------------------------------
 #        GENERAL HELPER FUNCTIONS RELATED TO ROBOT
 # -----------------------------------------------------------------------------
-
 # Data model for the 'set_robot_ip' tool
 class robot_connection_definition(BaseModel):
     robot_ip_list: List[str] = Field(description="list of IP addresses of the robots to be controlled...")
@@ -100,7 +102,7 @@ class get_joint_implementation(BaseTool):
 
     def _run(self, robot_to_use: int, wait: bool = True) -> list:
         try:
-            curr_joint_rads = bot_control.get_joint()
+            curr_joint_rads = wrapper.get_joint()
             return curr_joint_rads
         
         except Exception as e:
@@ -126,7 +128,7 @@ class get_pose_implementation(BaseTool):
     def _run(self, robot_to_use: int, wait: bool = True) -> list:
         print("get_pose_implementation")
         try:
-            curr_pose = robots[robot_to_use - 1].get_tcp().get_pose()
+            curr_pose = wrapper.get_tcp()
             return curr_pose
         except Exception as e:
             self.return_direct = True
@@ -152,8 +154,6 @@ class get_zone_pose_implementation(BaseTool):
 
         # Helper function to find the best matching zone name
         def get_best_zone_match(zone_name, robot_dict):
-            print("1")
-
             best_match = None
             best_ratio = 0
             for obj in robot_dict.keys():
@@ -161,8 +161,7 @@ class get_zone_pose_implementation(BaseTool):
                 if ratio > best_ratio:
                     best_ratio = ratio
                     best_match = obj
-            print("2")
-
+            
             return best_match
         
         robot_dict = json.loads(open(robot_home_file_path).read())
@@ -170,8 +169,8 @@ class get_zone_pose_implementation(BaseTool):
         try:
             robot_pose = robot_dict[robot_ip]
             zone_match = get_best_zone_match(zone_name, robot_pose)
-
             return robot_pose[zone_match]
+        
         except Exception as e:
             self.return_direct = True
             print("exception 1")
@@ -202,12 +201,12 @@ class hand_teach_implementation(BaseTool):
         try:
             if config:
                 # OwlClient("10.42.0.53").enter_teach_mode()
-                response = robots[robot_to_use - 1].enter_teach_mode()
+                response = wrapper.enter_teach_mode()
                 return response
 
             if not config:
                 # OwlClient("10.42.0.53").end_teach_mode()
-                response = robots[robot_to_use - 1].end_teach_mode()
+                response = wrapper.end_teach_mode()
                 return response
         except Exception as e:
             print("Robot is unable to switch in Hand teach")
@@ -218,6 +217,13 @@ class control_gripper_definition(BaseModel):
     switch: bool = Field(description="True to activate or close the gripper and False to deactivate or open the gripper.")
     robot_to_use: int = Field(default=1, description="the robot number to use. robot 1 will be the first IP address in the list, robot 2 will be the second IP address in the list and so on.")
     model: str = Field(default="robotiq", description="the gripper model robot is using for applications")
+
+
+
+
+####################################
+######3     NEED TO ADD ROBOTIQ GRIPPER DRIVER AND WRAPPER
+######################################  
 
 # Implementation of the 'control_gripper' tool
 class control_gripper_implementation(BaseTool):
@@ -247,12 +253,14 @@ class control_gripper_implementation(BaseTool):
             else:
                 pass
         else:
-            response = robots[robot_to_use - 1].set_digital_output(3, switch)
+            response = wrapper.set_digital_output(3, switch)
 
         return response
     
     def _arun(self, switch: bool):
         print("activate_gripper does not support async")
+
+
 
 # -----------------------------------------------------------------------------
 #                      MISC
@@ -278,6 +286,27 @@ class delay_implementation(BaseTool):
         time.sleep(delay)
         return ("added delay for " + str(delay) + " seconds")
     
+    
+# Data model for the 'send_to_webapp' tool
+class send_message_to_webapp_definition(BaseModel):
+    message: str = Field(description="The message we need to send to the webapp")
+ 
+# Implementation of the 'send_to_webapp' tool
+class send_message_to_webapp_implementation(BaseTool):
+    name = "send_to_webapp"
+    description = "Send a particular message to webapp"
+    args_schema: Type[BaseModel] = send_message_to_webapp_definition
+
+    def _run(self, message: str):
+        app_id = "1828565"
+        key = "7881fafa53083fd8c86b"
+        secret = "b016ae4c24ad125b4b58"
+        cluster = "ap2"
+
+        pusher_client = pusher.Pusher(
+            app_id=app_id, key=key, secret=secret, cluster=cluster)
+
+        pusher_client.trigger('private-chat', 'evt::test', {'message': message})
 # -----------------------------------------------------------------------------
 #                   ROBOT AND MOVEIT CONTROL
 # -----------------------------------------------------------------------------
@@ -299,7 +328,7 @@ class move_translate_implementation(BaseTool):
 
     def _run(self, robot_to_use: int = 1, x: float = 0.0, y: float = 0.0, z: float = 0.0, toolspeed: int = 100):
         try:
-            response = robots[robot_to_use - 1].move_translate(x, y, z, toolspeed)
+            response = wrapper.move_translate(x, y, z, toolspeed)
             robot_logger.info("Move Translate SUCCEEDED")
             return 
         except Exception as e:
@@ -347,7 +376,7 @@ class move_to_joint_implementation(BaseTool):
     def _run(self, jointPose: List[float], robot_to_use: int = 1, wait: bool = True, relative: bool = False) -> None:
         try:
             joint_goal = Joint(*jointPose)
-            response = robots[robot_to_use - 1].move_to_joint(joint_goal, 400, wait, relative)
+            response = wrapper.move_to_joint(joint_goal, 400)
             robot_logger.info("Motion planning SUCCEEDED")
         except Exception as e:
             self.return_direct = True
@@ -378,7 +407,7 @@ class move_to_pose_implementation(BaseTool):
         else:
             try:
                 goalPose = OwlPose(*goal_pose)
-                response = robots[robot_to_use - 1].move_to_pose(goalPose, velcoity_scale * 1000, wait=wait)
+                response = wrapper.move_to_pose(goalPose)
                 robot_logger.info(f"Motion planning SUCCEEDED : goal pose - {goal_pose}, velocity scaling factor - {velcoity_scale}")
             except Exception as e:
                 self.return_direct = True
@@ -399,7 +428,8 @@ class move_in_trajactory_implementation(BaseTool):
     def _run(self, waypoints: List[list]):
         try:
             robot_logger.info(f"Motion planning SUCCEEDED")
-
+            response = wrapper.move_trajectory(waypoints)
+            return response
         except Exception as e:
             robot_logger.error("Motion planning FAILED " + str(e))
 

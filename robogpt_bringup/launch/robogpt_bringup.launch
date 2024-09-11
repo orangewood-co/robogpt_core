@@ -1,0 +1,9 @@
+<launch>
+  <!-- Run a node from a package -->
+  <node 
+      pkg="robogpt_agents" 
+      type="test.py" 
+      name="test" 
+      output="screen">
+  </node>
+</launch>

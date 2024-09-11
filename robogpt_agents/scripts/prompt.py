@@ -1,26 +1,21 @@
+#!/usr/bin/python3
+
+import rospy
 import asyncio
-import argparse
 import importlib
-import websockets
 import requests
 import json
 import uuid
-from azure.messaging.webpubsubservice import WebPubSubServiceClient
-from azure.identity import DefaultAzureCredential
-from azure.messaging.webpubsubclient import WebPubSubClient
-from azure.messaging.webpubsubservice import WebPubSubServiceClient
-from azure.identity import DefaultAzureCredential
-import websockets
+import os, sys, json, importlib
+from langchain.prompts import PromptTemplate, chat, load_prompt
+from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
+from langchain.agents import initialize_agent, Tool, AgentType
 import os,json,requests,sys
-import spacy # type: ignore
+import spacy
 
-parser = argparse.ArgumentParser(description='Run the prompt with a specific setup')
-parser.add_argument('--setup', required=True, help='The setup to use for loading skills')
-args = parser.parse_args()
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import robogpt_agents.scripts.cloud_auth_and_llm as test_skill
 
+# import robogpt_v3.robogpt_agents.scripts.cloud_auth_and_llm.test_demo_skills as test_skill
 
 nlp = spacy.load('en_core_web_md')
 
@@ -39,19 +34,41 @@ secret = "b016ae4c24ad125b4b58"
 cluster = "ap2"
 ###############################
 
+
 pusher_client = pusher.Pusher(
     app_id=app_id, key=key, secret=secret, cluster=cluster)
 
 ###############################
 
 # Json file paths
-config_file = "config/owl/robogpt.json"
-tool_path = "config/owl/skill_list.json"
+base_dir = f"/home/{os.getlogin()}/orangewood_ws/src"
+sys.path.append(base_dir)
+
+tool_path = os.path.join(base_dir,"robogpt_v3/robogpt_config/tools_config/app_list.json")
+config_file = os.path.join(base_dir,"robogpt_v3/robogpt_config/robot_config/robogpt.json")
+module_name = f'robogpt_apps.scripts.base_applications'
+
 
 ################################
+def reload_bot_control():
+    try:
+        # Load the JSON file
+        with open(tool_path) as f:
+            data = json.load(f)
+
+        # Retrieve the function names
+        tool_names = data["apps"]
+
+        # Importing the trivial skills
+        applications = importlib.import_module(module_name)
+        importlib.reload(applications)
+        return applications, tool_names
+    
+    except Exception as e:
+        print(f"Could not load skills due to {e}")
 
 def local_prompt():
-    output_file = "config/owl/output.json"
+    output_file = os.path.join(base_dir,"robogpt_v3/robogpt_config/tools_config/output.json")
     command = "pusher channels apps subscribe --app-id 1828565 --channel private-chat"
 
     # Run the command and process the output
@@ -101,7 +118,7 @@ def get_user_id(file_path):
     with open(file_path, 'r') as file:
             data = json.load(file)
     return data.get('user_id')
-    
+
 # Function to translate text to English
 def translate_text(text_to_translate, to_language="en"):
     path = '/translate'
@@ -139,40 +156,26 @@ def check_tool_list(tool_path):
     tool_names = data["tools"]
     return tool_names
 
-old_number_of_tools = len(check_tool_list(tool_path=tool_path))
-data = ""
+
+def agent_run(promt):
+    print("prompt::::::", promt)
+    
+    return agent.run(f'''{promt}''') 
+
 # Rest of your setup and WebSocket connection code
 async def connect():
     print('Connected to WebPubSub')
 
     try:
-
             try:
-                new_tools = check_tool_list(tool_path=tool_path)
-                if old_number_of_tools != new_tools:
-                    importlib.reload(test_skill)
-                else:
-                    pass    
                 data,id  = local_prompt()
-                print(id)
-
-                '''This is a hardcoded process for user identification but will be automated in future
-                 You need to put the user key the in the if statement by taking it from console of web app
-                 steps
-                 1. open web app go to console copy the user id in the after sending some random msg
-                 2. paste the id in user_id key in robogpt.json in config dir '''
-                
-                user_id = get_user_id(config_file)
-                if id == user_id: # user key 
-                    output = test_skill.agent_run(data)# data.rstrip('"'))
-                    print(output)
-                    send_msg(output)
-                    print("Promt sent")
+                output = agent_run(data)# data.rstrip('"'))
+                print(output)
+                send_msg(message=output)
 
             except Exception as e:
                 print("ERROR in sending prompt", e)
-                await connect()
-                pass
+                
         # You may want to remove the break below to keep the loop going
 
     except Exception as e:
@@ -182,5 +185,30 @@ async def connect():
         print("Error:", e)
         # Reconnect or handle the error
 
+llm = AzureChatOpenAI(
+                deployment_name="robotgpt4-test", # The deployment name you chose when you deployed the GPT-35-Turbo or GPT-4 model.
+                openai_api_base= "https://robotgpt4-test.openai.azure.com/",
+                openai_api_key= "dded2f3a90864ab4a25e25a34cd70f5e",
+                openai_api_type="azure",
+                openai_api_version="2023-08-01-preview",
+                temperature=0.7,
+            )
+
+old_number_of_tools = len(check_tool_list(tool_path=tool_path))
+
+data = ""
+
+# Reload the bot_control module
+applications,skill_list = reload_bot_control()
+
+# Get the function objects
+tools = [getattr(applications, name + "_implementation")() for name in skill_list]
+
+agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
+
+rospy.init_node("langchain_roboGPT")
+
+
 while True:
     asyncio.get_event_loop().run_until_complete(connect())
+
