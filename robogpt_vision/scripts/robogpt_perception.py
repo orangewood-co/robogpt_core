@@ -55,42 +55,14 @@ class object_detection_implementation:
             Main loop for running object detection algorithms, updating results, and displaying frames.
     """
     def __init__(self):
-
-        rospy.init_node('image_subscriber_node', anonymous=True)
-        self.ARUCO_DICT = {
-        "DICT_4X4_50": cv2.aruco.DICT_4X4_50,
-        "DICT_4X4_100": cv2.aruco.DICT_4X4_100,
-        "DICT_4X4_250": cv2.aruco.DICT_4X4_250,
-        "DICT_4X4_1000": cv2.aruco.DICT_4X4_1000,
-        "DICT_5X5_50": cv2.aruco.DICT_5X5_50,
-        "DICT_5X5_100": cv2.aruco.DICT_5X5_100,
-        "DICT_5X5_250": cv2.aruco.DICT_5X5_250,
-        "DICT_5X5_1000": cv2.aruco.DICT_5X5_1000,
-        "DICT_6X6_50": cv2.aruco.DICT_6X6_50,
-        "DICT_6X6_100": cv2.aruco.DICT_6X6_100,
-        "DICT_6X6_250": cv2.aruco.DICT_6X6_250,
-        "DICT_6X6_1000": cv2.aruco.DICT_6X6_1000,
-        "DICT_7X7_50": cv2.aruco.DICT_7X7_50,
-        "DICT_7X7_100": cv2.aruco.DICT_7X7_100,
-        "DICT_7X7_250": cv2.aruco.DICT_7X7_250,
-        "DICT_7X7_1000": cv2.aruco.DICT_7X7_1000,
-        "DICT_ARUCO_ORIGINAL": cv2.aruco.DICT_ARUCO_ORIGINAL,
-        "DICT_APRILTAG_16h5": cv2.aruco.DICT_APRILTAG_16h5,
-        "DICT_APRILTAG_25h9": cv2.aruco.DICT_APRILTAG_25h9,
-        "DICT_APRILTAG_36h10": cv2.aruco.DICT_APRILTAG_36h10,
-        "DICT_APRILTAG_36h11": cv2.aruco.DICT_APRILTAG_36h11
-                        }
         
+        rospy.init_node('image_subscriber_node', anonymous=True)
+  
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.color_callback)
         self.depth_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.depth_callback)
         self.color_frame = None
         self.depth_frame = None
-        self.aruco_type = "DICT_6X6_250"
-        self.arucoDict = cv2.aruco.getPredefinedDictionary(self.ARUCO_DICT[self.aruco_type])
-        self.intrinsic_camera = np.array(((607.379638671875, 0.0, 323.45916748046875),(0.0, 607.0968627929688, 245.50621032714844),(0.0, 0.0, 1.0)))
-        self.distortion = np.array((0.0, 0.0, 0.0, 0.0, 0.0))
-        self.marker_file = "config/sim/marker.json"
 
         # self.zero_shot = ZeroShotDetection()
         self.color_detection = ColorDetection()
@@ -107,10 +79,16 @@ class object_detection_implementation:
     def depth_callback(self, data):
         try:
             # Convert the ROS Image message to OpenCV format
-            self.depth_frame = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            # Convert the ROS Image message to a CV image
+            depth_image = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")
+            
+            # Normalize the depth image to fall between 0 and 255
+            depth_image = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
+
+            # Convert the depth image to an 8-bit image (from a 32-bit float image)
+            self.depth_frame = np.uint8(depth_image)
         except CvBridgeError as e:
             print(e)
-
 
     
     def extract_3d_info(self,detection_result,color_frame,depth_frame):
@@ -225,177 +203,7 @@ class object_detection_implementation:
 
         return data
     
-    def detect_aruco(self,image,depth_frame,cam_matrix,dis_matrix):
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            h, w = gray.shape[:2]
-            newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.intrinsic_camera,self.distortion, (w, h), 1, (w, h))
-            dst = cv2.undistort(gray, self.intrinsic_camera, self.distortion, None, newcameramtx)
-            x, y, w, h = roi
-            dst = dst[y:y + h, x:x + w]
-            
-            
-            cv2.aruco_dict = cv2.aruco.getPredefinedDictionary(self.ARUCO_DICT[self.aruco_type])
-            parameters = cv2.aruco.DetectorParameters()
-            detector = cv2.aruco.ArucoDetector(cv2.aruco_dict,parameters)
-            corners, ids, rejected_img_points = detector.detectMarkers(dst)
-            
-            if len(corners) > 0:
-                ids = ids.flatten()
-                for (markerCorner, markerID) in zip(corners, ids):
-                    corners = markerCorner.reshape((4, 2))
-                    (topLeft, topRight, bottomRight, bottomLeft) = corners
-                    
-                    topRight = (int(topRight[0]), int(topRight[1]))
-                    bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
-                    bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
-                    topLeft = (int(topLeft[0]), int(topLeft[1]))
-
-                    cv2.line(image, topLeft, topRight, (0, 255, 0), 2)
-                    cv2.line(image, topRight, bottomRight, (0, 255, 0), 2)
-                    cv2.line(image, bottomRight, bottomLeft, (0, 255, 0), 2)
-                    cv2.line(image, bottomLeft, topLeft, (0, 255, 0), 2)
-                    
-                    cX = int((topLeft[0] + bottomRight[0]) / 2.0)
-                    cY = int((topLeft[1] + bottomRight[1]) / 2.0)
-                    cv2.circle(image, (cX, cY), 4, (0, 0, 255), -1)
-                    
-                    cv2.putText(image, str(markerID),(topLeft[0], topLeft[1] - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                        2, (0, 255, 0), 2)
-                    
-                    rvec, tvec, trash = self.my_estimatePoseSingleMarkers(markerCorner, 0.03, newcameramtx, self.distortion)
-                    cv2.aruco.drawDetectedMarkers(image,[markerCorner]) 
-                    cv2.drawFrameAxes(image,cam_matrix, dis_matrix, rvec, tvec, 0.03) 
-                    pose = np.array(tvec)
-                    pose = pose.flatten().tolist()
-                    distance, oreintation = self.orientation(tvec,rvec)
-                    depth = self.depth(depth_frame,cX,cY)
-                    position = [pose[0],pose[1],pose[2],oreintation[0][0],oreintation[0][1],oreintation[0][2]]
-                    # print(position)
-                    cv2.imshow('Estimated Pose', image)
-                    # print("Depth::", depth)
-                    self.save_marker_pose(markerID, position, cX, cY,self.marker_file, depth)
-                    
     
-
-    def my_estimatePoseSingleMarkers(self, corners, marker_size, mtx, distortion):
-        '''
-        This will estimate the rvec and tvec for each of the marker corners detected by:
-        corners, ids, rejectedImgPoints = detector.detectMarkers(image)
-        corners - is an array of detected corners for each detected marker in the image
-        marker_size - is the size of the detected markers
-        mtx - is the camera matrix
-        distortion - is the camera distortion matrix
-        RETURN list of rvecs, tvecs, and trash (so that it corresponds to the old estimatePoseSingleMarkers())
-        '''
-        marker_points = np.array([[-marker_size / 2, marker_size / 2, 0],
-                                [marker_size / 2, marker_size / 2, 0],
-                                [marker_size / 2, -marker_size / 2, 0],
-                                [-marker_size / 2, -marker_size / 2, 0]], dtype=np.float32)
-      
-        for c in corners:
-            nada, rvecs, tvecs = cv2.solvePnP(marker_points, c, mtx, distortion, False, cv2.SOLVEPNP_IPPE_SQUARE)
-        return rvecs, tvecs, nada
-
-
-    def orientation(self, tvecs, rvecs):
-        rot = []
-        distance = np.linalg.norm(tvecs)
-
-        # Ensure rvecs is a numpy array and reshape it if necessary
-        round_rvecs = np.round(rvecs, decimals=1)
-        if round_rvecs.shape == (3, 1) or round_rvecs.shape == (1, 3):
-            reshaped_rvecs = round_rvecs
-        elif round_rvecs.shape == (3,):
-            reshaped_rvecs = round_rvecs.reshape(3, 1)
-        elif round_rvecs.shape == (1, 3):
-            reshaped_rvecs = round_rvecs.reshape(1, 3)
-        else:
-            raise ValueError("rvecs has an unexpected shape")
-
-        # Ensure reshaped_rvecs has the correct shape
-        if reshaped_rvecs.shape == (3, 1) or reshaped_rvecs.shape == (1, 3):
-            angles = cv2.Rodrigues(reshaped_rvecs)[0]
-        else:
-            angles = cv2.Rodrigues(reshaped_rvecs.T)[0]  # Transpose if shape is not (3, 1) or (1, 3)
-
-        R = np.array(angles)
-        # Extract the pitch (Y-axis rotation) angle
-        pitch = np.arctan2(-R[2, 0], np.sqrt(R[0, 0] ** 2 + R[1, 0] ** 2))
-
-        # Extract the yaw (Z-axis rotation) angle
-        yaw = np.arctan2(R[1, 0], R[0, 0])
-
-        # Extract the roll (X-axis rotation) angle
-        roll = np.arctan2(R[2, 1], R[2, 2])
-        rot.append([roll, pitch, yaw])
-
-        return distance, rot
-
-    def depth(self,depth_frame,cX,cY):
-        depth_frame_copy = np.copy(depth_frame)
-        clm = depth_frame_copy.shape[1]
-        row = depth_frame_copy.shape[0]
-        # area = abs(xmax-xmin)*abs(ymax-ymin) # Area of bounding box
-        # Getting depth at center of bounding box using depth_frame        
-        depth = 0
-        depth = depth_frame_copy[cY,cX]
-        
-        return depth
-        
-
-    def save_marker_pose(self, markerId, pose, Cx, Cy, file_path, depth):
-        data = {}
-        # Ensure the file_path directory exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-        # Check if the file already exists and load its content
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                try:
-                    data = json.load(file)
-                except json.JSONDecodeError:
-                    print("Warning: Empty or corrupted JSON file. Starting fresh.")
-
-        # Ensure that the IP key exists in the dictionary
-        ip_key = "10.42.0.53"
-        if ip_key not in data:
-            data[ip_key] = {}
-        
-        # Maintain a persistent counter for detections
-        if 'detection_count' not in data[ip_key]:
-            data[ip_key]['detection_count'] = 0
-
-        # Check for existing detection of the same marker ID and update if found
-        existing_detection_key = None
-        for key, value in data[ip_key].items():
-            if isinstance(value, dict) and value.get('marker_id') == str(markerId):
-                existing_detection_key = key
-                break
-
-        if existing_detection_key:
-            detection_key = existing_detection_key
-        else:
-            detection_key = f"detection_{data[ip_key]['detection_count']}"
-            data[ip_key]['detection_count'] += 1
-
-        # Convert markerId to string to ensure compatibility with JSON keys
-        markerId_str = str(markerId)
-        depth = str(depth[0])
-        # Prepare the data to save
-        new_data = {
-            "marker_id": markerId_str,
-            "cam_frame_pose": pose,  # Assuming pose is a list of floats
-            "center_pt": [Cx, Cy],
-            "depth_at_center": depth
-        }
-
-        # Save the new data under the detection key
-        data[ip_key][detection_key] = new_data
-
-        # Write the updated data back to the file
-        with open(file_path, 'w') as file:
-            json.dump(data, file, indent=4)
-
     def _run(self):
         """
         Execute object detection and feature extraction algorithms in a continuous loop. It is launched with launch.py script.

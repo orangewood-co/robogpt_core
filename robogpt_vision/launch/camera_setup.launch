@@ -1,0 +1,7 @@
+<launch>
+    <!-- Launch the RealSense camera node -->
+    <node pkg="robogpt_vision" type="set_realsense_sources.py" name="camera_setup" output="screen">
+        <!-- Add other parameters as needed -->
+    </node>
+
+</launch>

@@ -1,14 +1,19 @@
+#!/usr/bin/env python3
+
 import cv2
 import json
+import yaml
 
 import tkinter as tk
 from tkinter import simpledialog
-
+import rospy
 import sys, os
 import numpy as np
 import pyrealsense2 as rs
 import time
+import rospkg
 
+rospy.init_node("camera_setup", anonymous=True)
 
 def get_profiles():
     ctx = rs.context()
@@ -50,17 +55,30 @@ def get_profiles():
     return devices_info
 
 
-def save_to_json_file(data, filename):
+# Function to read and modify a YAML file
+def modify_yaml_file(filename, camera_name, serial,i):
+
+    rospack = rospkg.RosPack()
+    package_path = rospack.get_path('robogpt_vision')  # Replace 'my_package' with your package name
+    
+    # Construct the full path to the YAML file
+    yaml_file_path = os.path.join(package_path, 'config', filename)
+    yaml_file_path = "/home/robogpt/orangewood_ws/src/robogpt_v3/robogpt_vision/config/camera_params.yaml"
+
+    rospy.logwarn(yaml_file_path)
+    # Read the existing YAML file
     with open(filename, 'r') as file:
-        file_data = json.load(file)
+        data = yaml.safe_load(file)
 
-    
-    file_data["camera_config"] = {}
-    file_data["camera_config"].update(data)
-    
+    # Modify the specific key
+    data["camera_"+str(i)] = camera_name
+    data["serial_no_"+str(i)] = serial
+    data["number_of_cams"] = i
 
+    # Write the modified data back to the same file (or a new file)
     with open(filename, 'w') as file:
-        json.dump(file_data, file, indent=4)
+        yaml.dump(data, file)
+
 
 def get_user_input(title, prompt):
     root = tk.Tk()
@@ -70,7 +88,8 @@ def get_user_input(title, prompt):
 if __name__ == "__main__":
     all_rs_device_info = get_profiles()
     config_out = {}
-    for ii, device_info in enumerate(all_rs_device_info):
+    for j, device_info in enumerate(all_rs_device_info):
+        i = 1
         name = device_info['name']
         serial = device_info['serial']
         (cw, ch, cfps, cfmt) = device_info['color_format']
@@ -97,20 +116,11 @@ if __name__ == "__main__":
             key = cv2.waitKey(1)  & 0xFF
             if key == ord("y"):
                 camera_name = get_user_input("Camera name", f"Enter a name for camera {name}-{serial}:")
-                config_out[camera_name] = {"camera_index": serial, "model": name}
-                config_out[camera_name].update(device_info)
+                modify_yaml_file('camera_params.yaml',camera_name,serial,i)
                 break
             elif key == ord("n"):
                 cv2.destroyAllWindows()
                 break
-    root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
 
-    print(root_path, "root_path")
-    # two levels down from owl_robotgpt
-    
-    json_filename = "robogpt_v3/robogpt_config/robot_config/robogpt.json"
-    print(json_filename)
-    print(config_out)
 
-    save_to_json_file(config_out, json_filename)
 

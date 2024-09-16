@@ -1,0 +1,12 @@
+<launch>
+    <rosparam command="load" file="$(find robogpt_vision)/config/camera_params.yaml"/>
+
+
+
+    <!-- Launch the RealSense camera node -->
+    <node pkg="robogpt_vision" type="rs_camera.launch" name="camera_1" output="screen">
+        <param name="camera" value="$(param camera_1)" />
+        <!-- Add other parameters as needed -->
+    </node>
+
+</launch>

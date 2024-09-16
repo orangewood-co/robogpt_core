@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+import os
+import time
+import subprocess
+
+def launch_with_delay(launch_file, args, delay):
+    command = ['roslaunch'] + launch_file.split() + args
+    process = subprocess.Popen(command)
+    time.sleep(delay)
+    return process
+
+def close_with_delay(processes, delay):
+    
+    for process in processes:
+        process.terminate()
+        time.sleep(delay)
+
+if __name__ == '__main__':
+    try:
+        # Define the arguments for each launch file
+        args_sim = ['type:=2d', 'world:=triangle']
+        args_moveit = ['robot:=ec612', 'mode:=sim']
+        args_perception = []
+
+        # Launch first file
+        process_sim = launch_with_delay('autosanding_sim simulation.launch', args_sim, 5)
+
+        # Launch second file
+        process_moveit = launch_with_delay('elite_moveit elite_moveit.launch', args_moveit, 5)
+
+        # Launch third file
+        process_perception = launch_with_delay('perception perception.launch', args_perception, 5)
+
+        # Launch fourth file
+        process_moveit_motion = launch_with_delay('motion_generation moveit_2d.launch', args_moveit,8)
+
+        # Wait for all processes to complete
+        process_sim.wait()
+        process_moveit.wait()
+        process_perception.wait()
+
+    except KeyboardInterrupt:
+        # Terminate all processes if the script is interrupted
+        processes = [process_sim, process_moveit, process_perception, process_moveit_motion]
+        #processes = [process_moveit, process_perception]
+        close_with_delay(processes, 5)
+
+        print("Processes terminated")
+
+    finally:
+        # Ensure all processes are terminated on script exit
+        processes = [process_sim, process_moveit, process_perception, process_moveit_motion]
+        #processes = [process_moveit, process_perception]
+        close_with_delay(processes, 5)
