@@ -1,5 +1,6 @@
 <launch>
   <!-- Run a node from a package -->
+   <param name="/robot_model" value="sim" />
   <node 
       pkg="robogpt_agents" 
       type="prompt.py" 

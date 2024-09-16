@@ -1,6 +1,18 @@
 {
     "apps": [
-        "test"
-
+        "test",
+        "control_gripper",
+        "hand_teach",
+        "move_translate",
+        "move_to_pose",
+        "move_to_joint",
+        "get_zone_pose",
+        "get_pose",
+        "robot_connection",
+        "move_in_trajactory",
+        "zone_selection",
+        "pick_object",
+        "place_object",
+        "check_pose"
     ]
 }

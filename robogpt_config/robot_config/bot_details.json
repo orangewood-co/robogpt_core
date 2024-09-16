@@ -1,0 +1,16 @@
+{ 
+    "sim": {
+        "robot_group": "arm",
+        "gripper_group": "gripper"
+    },
+    
+    "owl6.5": {
+        "robot_ip": "10.42.0.53"
+
+    },
+    
+    "ec63": {
+        "robot_ip":"190.162.0.24"
+    }
+
+}
