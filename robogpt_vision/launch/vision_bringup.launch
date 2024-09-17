@@ -4,9 +4,9 @@
 
 
     <!-- Launch the RealSense camera node -->
-    <node pkg="robogpt_vision" type="rs_camera.launch" name="camera_1" output="screen">
-        <param name="camera" value="$(param camera_1)" />
-        <!-- Add other parameters as needed -->
+    <node pkg="robogpt_vision" type="init_detection.py" name="camera_startup" output="screen">    
     </node>
+
+
 
 </launch>

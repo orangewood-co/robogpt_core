@@ -7,21 +7,26 @@ import struct
 import numpy as np
 import open3d as o3d
 from paho.mqtt import client as mqtt_client
-from ..object_detection.zero_shot import ZeroShotDetection
-from ..object_detection.yolov8_detect import YoloV8Detection
-from ..feature_detection.color_detection import ColorDetection
 from scipy.spatial.transform import Rotation as R
-from buffer import DetectionBuffer
-from utils.utils import *
-from core.vision_skills.sim.get_world_context import *
 import rospy
+import rospkg
+import sys
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 ################## CONFIG PATHS #######################################
+rospack = rospkg.RosPack()
+package_path = rospack.get_path('robogpt_vision')  # Replace 'my_package' with your package name 
+sys.path.append(package_path)
 
-robot_camera_path = os.path.join(os.getcwd(),"config/sim/robogpt.json")
-detection_results_path = os.path.join(os.getcwd(),"config/sim/detection_results.json")
+from scripts.object_detection.zero_shot import ZeroShotDetection
+from scripts.object_detection.yolov8_detect import YoloV8Detection
+from scripts.feature_detection.color_detection import ColorDetection
+from scripts.buffer import DetectionBuffer
+
+# Construct the full path to the YAML file
+robot_camera_path = os.path.join(package_path,"config/robogpt.json")
+detection_results_path = os.path.join(package_path,"config/detection_results.json")
 
 
 class object_detection_implementation:
@@ -54,13 +59,13 @@ class object_detection_implementation:
         _run():
             Main loop for running object detection algorithms, updating results, and displaying frames.
     """
-    def __init__(self):
-        
-        rospy.init_node('image_subscriber_node', anonymous=True)
-  
+    def __init__(self,cam_name):
+        self.cam_name = cam_name
+        rospy.init_node("Object_detection_node")
+        rospy.logerr(f"Name of the camera running:: {self.cam_name}")
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.color_callback)
-        self.depth_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.depth_callback)
+        self.image_sub = rospy.Subscriber("/top/color/image_raw", Image, self.color_callback)
+        self.depth_sub = rospy.Subscriber("/top/depth/image_rect_raw", Image, self.depth_callback)
         self.color_frame = None
         self.depth_frame = None
 
@@ -73,6 +78,9 @@ class object_detection_implementation:
         try:
             # Convert the ROS Image message to OpenCV format
             self.color_frame = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            color_frame_copy = np.copy(self.color_frame)
+            cv2.imshow("test",color_frame_copy)
+
         except CvBridgeError as e:
             print(e)
 
@@ -231,6 +239,7 @@ class object_detection_implementation:
             detection_results = {}
             i = 0
             if self.color_frame is None: # If the camera feed is None
+                print("No frame") 
                 time.sleep(0.1)
                 continue
 

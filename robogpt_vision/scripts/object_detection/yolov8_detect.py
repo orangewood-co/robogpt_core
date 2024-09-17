@@ -6,6 +6,7 @@ import json
 import time
 import os
 import numpy as np
+import rospkg, rospy
 from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 import struct
@@ -28,11 +29,13 @@ class YoloV8Detection:
     '''
 
     def __init__(self):
-        self.weights_path = 'core/vision_skills/object_detection/weights/best_marico_1.pt'
+        rospack = rospkg.RosPack()
+        package_path = rospack.get_path('robogpt_vision')
+        self.weights_path = os.path.join(package_path,"scripts/object_detection/weights/best_marico_1.pt")
+        rospy.logerr(self.weights_path)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = YOLO(self.weights_path).to(self.device)
-        self.robot_context = self.parse_json_file("config/owl/robogpt.json")
-        self.config = self.robot_context['camera_config']
+
 
     def parse_json_file(self,file_name):
         """

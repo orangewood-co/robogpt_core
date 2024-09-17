@@ -7,16 +7,12 @@ import rospy, rospkg
 import subprocess 
 import multiprocessing
 
-rospack = rospkg.RosPack()
-package_path = rospack.get_path('robogpt_vision')  # Replace 'my_package' with your package name
-sys.path.append(package_path)
-try:
-    file_path = f'scripts.robogpt_perception'
-    object_detection = importlib.import_module(file_path)
-    object_detection = getattr(object_detection, 'object_detection_implementation')
-except Exception as err:
-    print("Could not load robot due to ",err)
 
+rospack = rospkg.RosPack()
+package_path = rospack.get_path('robogpt_vision')  
+sys.path.append(package_path)
+
+from scripts.robogpt_perception import object_detection_implementation
 
 def launch_with_delay(launch_file, args, delay):
     command = ['roslaunch'] + launch_file.split() + args
@@ -31,8 +27,8 @@ def close_with_delay(processes, delay):
         time.sleep(delay)
 
 def init_obj_detection(cam_name):
-    obj_detection = object_detection(cam_name)
-    obj_detection._run()
+    object_detection = object_detection_implementation(cam_name = cam_name)
+    object_detection._run()
     
 
 if __name__ == '__main__':
@@ -49,17 +45,15 @@ if __name__ == '__main__':
             args_cams = [f'camera:={cam_name}', f'serial_no:={serial_number}']
 
             # Launch first file
-            process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
-            process_init_detection = multiprocessing.Process(target=init_obj_detection, args= cam_name,)
+            process_init_detection = multiprocessing.Process(target=init_obj_detection, args= (cam_name,))
 
             # Wait for all processes to complete
-            process_camera_startup.wait()
             process_init_detection.start()
 
 
     except KeyboardInterrupt:
         # Terminate all processes if the script is interrupted
-        processes = [process_camera_startup, process_camera_startup]
+        processes = [process_camera_startup]
         #processes = [process_moveit, process_perception]
         close_with_delay(processes, 5)
 
@@ -67,7 +61,7 @@ if __name__ == '__main__':
 
     finally:
         # Ensure all processes are terminated on script exit
-        processes = [process_camera_startup,process_init_detection]
+        processes = [process_init_detection]
         #processes = [process_moveit, process_perception]
         close_with_delay(processes, 5)
 

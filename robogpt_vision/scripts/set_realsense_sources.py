@@ -3,7 +3,6 @@
 import cv2
 import json
 import yaml
-
 import tkinter as tk
 from tkinter import simpledialog
 import rospy
@@ -60,14 +59,19 @@ def modify_yaml_file(filename, camera_name, serial,i):
 
     rospack = rospkg.RosPack()
     package_path = rospack.get_path('robogpt_vision')  # Replace 'my_package' with your package name
-    
-    # Construct the full path to the YAML file
-    yaml_file_path = os.path.join(package_path, 'config', filename)
-    yaml_file_path = "/home/robogpt/orangewood_ws/src/robogpt_v3/robogpt_vision/config/camera_params.yaml"
+    sys.path.append(package_path)
 
-    rospy.logwarn(yaml_file_path)
+    # Construct the full path to the YAML file
+    yaml_file_path = os.path.join(package_path,"config/camera_params.yaml")
+
+    rospy.logwarn("YAML File Path: %s", yaml_file_path)
+    
     # Read the existing YAML file
-    with open(filename, 'r') as file:
+    if not os.path.exists(yaml_file_path):
+        rospy.logerr("File not found: %s", yaml_file_path)
+        return
+
+    with open(yaml_file_path, 'r') as file:
         data = yaml.safe_load(file)
 
     # Modify the specific key
@@ -76,7 +80,7 @@ def modify_yaml_file(filename, camera_name, serial,i):
     data["number_of_cams"] = i
 
     # Write the modified data back to the same file (or a new file)
-    with open(filename, 'w') as file:
+    with open(yaml_file_path, 'w') as file:
         yaml.dump(data, file)
 
 
