@@ -1,12 +1,10 @@
+
 <launch>
+    <!-- loading the camera details  -->
     <rosparam command="load" file="$(find robogpt_vision)/config/camera_params.yaml"/>
 
-
-
-    <!-- Launch the RealSense camera node -->
-    <node pkg="robogpt_vision" type="init_detection.py" name="camera_startup" output="screen">    
+    <!-- Launching the vision startup node -->
+    <node pkg="robogpt_vision" type="vision_startup.py" name="start_vision" output="screen">    
     </node>
-
-
 
 </launch>

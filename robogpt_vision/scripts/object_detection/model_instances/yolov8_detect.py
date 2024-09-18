@@ -6,11 +6,14 @@ import json
 import time
 import os
 import numpy as np
+import rospkg, rospy
 from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 import struct
 from ultralytics import YOLO
 from scipy.stats import trim_mean
+
+# robogpt_config = "config/owl/robogpt.json"
 
 class YoloV8Detection:
     ''' Implements a fintuned yoloV5 model on custom weights.
@@ -26,9 +29,26 @@ class YoloV8Detection:
     '''
 
     def __init__(self):
-        self.weights_path = 'core/skills/vision_skills/object_detection/weights/seeking/best.pt'
+        rospack = rospkg.RosPack()
+        package_path = rospack.get_path('robogpt_vision')
+        self.weights_path = os.path.join(package_path,"scripts/object_detection/weights/best_marico_1.pt")
+        rospy.loginfo("Initiating YoloV8 Model")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = YOLO(self.weights_path).to(self.device)
+
+
+    def parse_json_file(self,file_name):
+        """
+        Loads and returns the content of a JSON file.
+
+        Args:
+            file_name (str): The path to the JSON file to be parsed.
+
+        Returns:
+            dict: The content of the JSON file loaded into a dictionary.
+        """
+        with open(file_name, 'r') as f:
+            return json.load(f)
 
     def extract_object(self, results, color_frame, depth_frame):
         ''' Crops the color frame and depth frame based on bounding box coordinates stored in results["xyxy"].
@@ -67,8 +87,32 @@ class YoloV8Detection:
             return int(trim_mean(depth_values, 0.25))  # Trim 25% from both ends
         else:
             return 0
+        
+    def read_new_weights(self,json_file):
+        # Read the JSON data from the file
+        with open(json_file, 'r') as file:
+            data = json.load(file)
+        
+        # Return the value for the key 'new_weights'
+        return data.get('new_weights')
+    def clear_weights(self,file_path):
+
+        with open(file_path, 'r') as file:
+                data = json.load(file)
+            
+            # Update the value for the key 'new_weights'
+        data['new_weights'] = ""
+            
+            # Write the updated JSON data back to the file
+        with open(file_path, 'w') as file:
+                json.dump(data, file, indent=4)
 
     def detect(self, image):
+        # weights_path = self.read_new_weights(robogpt_config)
+        # if weights_path != "":
+        #     self.model = YOLO(weights_path).to(self.device)
+        #     self.clear_weights(robogpt_config)
+        
         results = self.model(image)
         detections = []
 
@@ -83,14 +127,14 @@ class YoloV8Detection:
                 current_confidence = float(confidence_score[i])
                 current_box = [float(boxes[i][0]), float(boxes[i][1]), float(boxes[i][2]), float(boxes[i][3])]
 
-                if current_class == "blue box" or current_class == "black box":
-                    if current_confidence < 0.8:
+                if current_class in ['body-lotion','coconut-oil', 'hair-gel','hair-serum','power','power-supply','lotion']:
+                    if current_confidence < 0.3:
                         # Skip detections with confidence less than 0.7
                         continue
-
                 # Check if current class is already present in detections
                 class_found = False
                 for detection in detections:
+                    # print(f"{detection}\n\n")
                     if detection['class'] == current_class:
                         class_found = True
                         if current_confidence > detection['confidence']:
@@ -126,7 +170,7 @@ class YoloV8Detection:
         detections = self.detect(color_frame)
 
         for detection in detections:
-            if detection['confidence'] < 0.4:
+            if detection['confidence'] < 0.3:
                 continue
 
             xmin, ymin, xmax, ymax = map(int, detection['box_points'])
@@ -196,7 +240,7 @@ class YoloV8Detection:
 
         image = Image.fromarray(cv2.cvtColor(color_frame_copy, cv2.COLOR_BGR2RGB))
         max_prob = -np.inf
-        predictions = self.detector(image, candidate_labels=["cereal box", "box", "phone"])
+        predictions = self.detector(image, candidate_labels=["body-lotion","coconut-oil", "hair-gel","hair-serum"])
         best_label = None
 
         for prediction in predictions:

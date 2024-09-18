@@ -1,0 +1,21 @@
+{
+    "object_detection_alg": [
+        "yolo_detection"
+    ],
+    "aruco_detection": [
+        "True"
+    ],
+    "objects_to_detect": [
+        "sprite",
+        "coke",
+        "Glass",
+        "Vodka",
+        "Whiskey",
+        "Gin",
+        "Rum",
+        "tonic",
+        "OJ"
+    ],
+    "new_weights": "",
+    "old_data_set": "auto_train_data/train_v20240703194007"
+}

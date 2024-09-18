@@ -1,31 +1,29 @@
 #!/usr/bin/env python3
 import os
+import sys
 import cv2
 import json
 import time
-import struct
+import rospy
+import signal
+import rospkg
 import numpy as np
 import open3d as o3d
-from paho.mqtt import client as mqtt_client
-from scipy.spatial.transform import Rotation as R
-import rospy
-import rospkg
-import sys
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+from scipy.spatial.transform import Rotation as R
 
 ################## CONFIG PATHS #######################################
 rospack = rospkg.RosPack()
-package_path = rospack.get_path('robogpt_vision')  # Replace 'my_package' with your package name 
+package_path = rospack.get_path('robogpt_vision')    
 sys.path.append(package_path)
 
-from scripts.object_detection.zero_shot import ZeroShotDetection
-from scripts.object_detection.yolov8_detect import YoloV8Detection
+from scripts.object_detection.model_instances.yolov8_detect import YoloV8Detection
 from scripts.feature_detection.color_detection import ColorDetection
-from scripts.buffer import DetectionBuffer
+from scripts.object_detection.model_instances.buffer import DetectionBuffer
 
 # Construct the full path to the YAML file
-robot_camera_path = os.path.join(package_path,"config/robogpt.json")
+robot_camera_path = os.path.join(package_path,"config/vision_config.json")
 detection_results_path = os.path.join(package_path,"config/detection_results.json")
 
 
@@ -59,17 +57,17 @@ class object_detection_implementation:
         _run():
             Main loop for running object detection algorithms, updating results, and displaying frames.
     """
-    def __init__(self,cam_name):
-        self.cam_name = cam_name
-        rospy.init_node("Object_detection_node")
-        rospy.logerr(f"Name of the camera running:: {self.cam_name}")
+    def __init__(self):
+
+        self.cam_name = rospy.get_param("/Object_detection_node/camera_name",default="camera")
+        rospy.loginfo(f"Name of the camera running:: {self.cam_name}")
+
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/top/color/image_raw", Image, self.color_callback)
-        self.depth_sub = rospy.Subscriber("/top/depth/image_rect_raw", Image, self.depth_callback)
+        self.image_sub = rospy.Subscriber(f"/{self.cam_name}/color/image_raw", Image, self.color_callback)
+        self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/depth/image_rect_raw", Image, self.depth_callback)
         self.color_frame = None
         self.depth_frame = None
 
-        # self.zero_shot = ZeroShotDetection()
         self.color_detection = ColorDetection()
         self.yolo_detection = YoloV8Detection()
         self.detection_buffer = DetectionBuffer()
@@ -78,8 +76,6 @@ class object_detection_implementation:
         try:
             # Convert the ROS Image message to OpenCV format
             self.color_frame = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            color_frame_copy = np.copy(self.color_frame)
-            cv2.imshow("test",color_frame_copy)
 
         except CvBridgeError as e:
             print(e)
@@ -211,7 +207,10 @@ class object_detection_implementation:
 
         return data
     
-    
+    def signal_handler(sig, frame):
+        rospy.loginfo("Keyboard interrupt received. Exiting...")
+        rospy.signal_shutdown("KeyboardInterrupt")
+
     def _run(self):
         """
         Execute object detection and feature extraction algorithms in a continuous loop. It is launched with launch.py script.
@@ -232,8 +231,6 @@ class object_detection_implementation:
             f = open(robot_camera_path)
             robogpt_data = json.loads(f.read())
             algorithm_list = robogpt_data["object_detection_alg"]
-            arcuo_bool = robogpt_data["aruco_detection"]
-            camera_dict = robogpt_data["camera_list"]
             f.close()
 
             detection_results = {}
@@ -246,16 +243,9 @@ class object_detection_implementation:
             color_frame_copy = np.copy(self.color_frame)
             depth_frame_copy = np.copy(self.depth_frame)
             
-            if arcuo_bool:
-                depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_frame_copy, alpha=0.03), cv2.COLORMAP_JET)
-                self.detect_aruco(color_frame_copy,depth_colormap,self.intrinsic_camera,dis_matrix=self.distortion)
-            
-            
+           
             # Running the algorithms layer specified by the user
             for algorithms in algorithm_list:
-
-                # if algorithms == "zero_shot":
-                #     detection_results = self.zero_shot.run(detection_results,color_frame_copy,depth_frame_copy)
                 if algorithms == "color_detection":
                     detection_results = self.color_detection.run(detection_results,color_frame_copy,depth_frame_copy)
                 elif algorithms == "yolo_detection":
@@ -267,7 +257,7 @@ class object_detection_implementation:
             
             # Saving the results in detection_results.json
             robot_dict = json.loads(open(detection_results_path).read())
-            robot_dict[camera_dict["top"]] = detection_results
+            robot_dict[self.cam_name] = detection_results
 
             # robot_dict = self.detection_buffer.merge_frames(robot_dict,camera_ip)
             for robot_ip, detections in robot_dict.items():
@@ -304,3 +294,20 @@ class object_detection_implementation:
             key = cv2.waitKey(1)
             if key == ord('q'):
                 break
+
+if __name__ == "__main__":
+    # Initialize the ROS node
+    rospy.init_node("Object_detection_node")
+
+    # Create an object of your detection class
+    object_detection = object_detection_implementation()
+
+    # Handle keyboard interrupt
+    signal.signal(signal.SIGINT,object_detection.signal_handler)
+    try:
+        # Run the object detection implementation
+        object_detection._run()
+        rospy.spin()
+
+    except rospy.ROSInterruptException:
+        rospy.loginfo("ROS Interrupt Exception occurred. Node terminated.")

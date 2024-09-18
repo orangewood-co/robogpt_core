@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
 import cv2
-import json
 import yaml
-import tkinter as tk
-from tkinter import simpledialog
 import rospy
 import sys, os
-import numpy as np
-import pyrealsense2 as rs
-import time
 import rospkg
+import numpy as np
+import tkinter as tk
+import pyrealsense2 as rs
+from tkinter import simpledialog
 
-rospy.init_node("camera_setup", anonymous=True)
+rospy.init_node("stereo_camera_setup", anonymous=True)
 
 def get_profiles():
     ctx = rs.context()
@@ -58,7 +56,7 @@ def get_profiles():
 def modify_yaml_file(filename, camera_name, serial,i):
 
     rospack = rospkg.RosPack()
-    package_path = rospack.get_path('robogpt_vision')  # Replace 'my_package' with your package name
+    package_path = rospack.get_path('robogpt_vision')   
     sys.path.append(package_path)
 
     # Construct the full path to the YAML file

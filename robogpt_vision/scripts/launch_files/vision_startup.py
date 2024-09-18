@@ -8,7 +8,7 @@ import subprocess
 import multiprocessing
 
 rospack = rospkg.RosPack()
-package_path = rospack.get_path('robogpt_vision')  # Replace 'my_package' with your package name
+package_path = rospack.get_path('robogpt_vision')   
 sys.path.append(package_path)
 try:
     file_path = f'scripts.robogpt_perception'
@@ -37,7 +37,7 @@ def init_obj_detection(cam_name):
 
 if __name__ == '__main__':
     try:
-        rospy.init_node("detection_startup",anonymous=True)
+        rospy.init_node("start_vision",anonymous=True)
         cams = rospy.get_param("number_of_cams",default=1)
         print(cams)
         for i in range(cams):
@@ -47,19 +47,19 @@ if __name__ == '__main__':
 
             # Define the arguments for each launch file
             args_cams = [f'camera:={cam_name}', f'serial_no:={serial_number}']
-
+            args_cam_name =[f'camera_name:={cam_name}']
             # Launch first file
             process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
-            process_init_detection = multiprocessing.Process(target=init_obj_detection, args= cam_name,)
+            process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
 
             # Wait for all processes to complete
             process_camera_startup.wait()
-            process_init_detection.start()
+            process_init_detection.wait()
 
 
     except KeyboardInterrupt:
         # Terminate all processes if the script is interrupted
-        processes = [process_camera_startup, process_camera_startup]
+        processes = [process_camera_startup, process_init_detection]
         #processes = [process_moveit, process_perception]
         close_with_delay(processes, 5)
 

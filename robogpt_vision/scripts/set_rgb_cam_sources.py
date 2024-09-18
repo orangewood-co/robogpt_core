@@ -1,12 +1,18 @@
+#!/usr/bin/env python3
+
+import os
 import cv2
 import json
-import imutils
-from imutils.video import VideoStream
-import tkinter as tk
-from tkinter import simpledialog
-import pyrealsense2 as rs
 import time
 import sys
+import rospkg
+import rospy
+import imutils
+import tkinter as tk
+from tkinter import simpledialog
+from imutils.video import VideoStream
+
+rospy.init_node("rgb_camera_setup", anonymous=True)
 
 def find_working_webcams(max_cameras=10):
     working_webcams = []
@@ -68,11 +74,11 @@ if __name__ == "__main__":
                 cv2.destroyAllWindows()
                 break
 
-    current_dir = sys.path[0]
+    rospack = rospkg.RosPack()
+    package_path = rospack.get_path('robogpt_vision')    
+    sys.path.append(package_path)
 
-    # go back one directory
-    current_dir = current_dir[:current_dir.rfind("/")]
-    json_filename = "robogpt_v3/robogpt_config/robot_config/robogpt.json"
+    json_filename = os.path.join(package_path,"config/vision_config.json")
 
 
     

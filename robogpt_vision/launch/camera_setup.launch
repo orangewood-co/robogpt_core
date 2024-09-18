@@ -1,7 +1,12 @@
+
 <launch>
-    <!-- Launch the RealSense camera node -->
-    <node pkg="robogpt_vision" type="set_realsense_sources.py" name="camera_setup" output="screen">
-        <!-- Add other parameters as needed -->
-    </node>
+    <!-- Define an argument 'type' with default value 'stereo' -->
+    <arg name="type" default="stereo"/>  <!-- options : stereo or rgb -->
+
+    <!-- Launch stereo camera setup node only if 'type' is 'stereo' -->
+    <node pkg="robogpt_vision" type="set_realsense_sources.py" name="stereo_camera_setup" output="screen" if="$(eval arg('type') == 'stereo')" />
+
+    <!-- Launch RGB camera setup node only if 'type' is 'rgb' -->
+    <node pkg="robogpt_vision" type="set_rgb_cam_sources.py" name="rgb_camera_setup" output="screen" if="$(eval arg('type') == 'rgb')" />
 
 </launch>
