@@ -285,7 +285,7 @@ class object_detection_implementation:
                     cv2.putText(color_frame_copy, f"{result['detected_object']}", (xmin, ymin), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
             frame_data = color_frame_copy.tobytes()
-            cv2.imshow('wrist_cam frame', color_frame_copy)
+            cv2.imshow(f'{self.cam_name+"_frame"}', color_frame_copy)
             elapsed_time = time.time() - start_time
             if not image_sent and elapsed_time > 20:
                 image_sent = True
