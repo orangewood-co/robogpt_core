@@ -8,6 +8,8 @@ mkdir -p ~/workspaces/robogpt/robogpt_ws/src
 # git clone https://bitbucket.org/owl-dev/robogpt-moveit.git ~/workspaces/robogpt/robogpt_ws/src/robogpt-moveit
 # git clone https://bitbucket.org/owl-dev/auto-train.git ~/workspaces/robogpt/robogpt-core/core/skills/vision_skills/object_detection/auto_train
 
+
+
 # Step 2: Install requirements
 echo "Installing requirements..."
 
