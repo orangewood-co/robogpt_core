@@ -10,7 +10,6 @@
   <arg name="world" default="empty" />                <!-- Option: empty, stand,table -->
   <arg name="camera" default="on" />                  <!-- Option: empty, stand,table -->
   <arg name="sim" default="on" />                     <!-- Option: simulation ON or OFF -->
-  <arg name="time" default="5" />                     <!-- Option: Time to launch MoveIt -->
 
 
   <!-- Set the type of run and running arguments -->

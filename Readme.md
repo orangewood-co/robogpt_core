@@ -5,7 +5,7 @@ This repository contains all the core packages of Orangewood' s Robogpt includin
 
 Methods 
 - Setting up Robogpt on Local machine
-- Setting up in Docker
+- Setting up in Docker (*To-Do*)
 
 ## 1) Setting Simulation in HOST PC
 
@@ -40,6 +40,13 @@ git clone git@bitbucket.org:owl-dev/robogpt-v3.git
 git clone git@bitbucket.org:owl-dev/robot_drivers.git
 git clone git@bitbucket.org:owl-dev/robogpt_apps.git
 
+# Hardware Context package
+git clone git@bitbucket.org:owl-dev/robogpt_hardware_stack.git
+
+# Simulation package
+git clone git@bitbucket.org:owl-dev/orangewood_simstack.git
+
+** Note: You might need to setup some external dependencies for these supporting packages.Please Go through each individual readme of these repositories
 
 
 cd ~/orangewood_ws
@@ -77,7 +84,7 @@ cd ~/orangewood_ws/src/robogpt_v3/robogpt_bringup/setup/
 pip3 install -r requirements.txt
 ```
 
-## Launching Robogpt on loacl machine
+## Launching Robogpt on local machine
 
 #### Camera setup
 ```
@@ -86,10 +93,10 @@ roslaunch robogpt_vision camera_setup.launch
 
 #### Running robogpt bringup 
 ```
-roslaunch robogpt_bringup bringup.launch bot:=sim
+roslaunch robogpt_bringup bringup.launch robot_name:=sim 
 
 ```
-Current options for bots:- owl_68, owl_65, ec66, ec612, ec63 and sim
+Current options for bots:- owl_68, owl_65, ec66, ec612, ec63 and sim for simulation
 
 #### To run each module seperatly
 - Running vision stack
@@ -98,14 +105,14 @@ roslaunch robogpt_vision vision_bringup.launch
 ```
 - Running agent stack
 ```
-roslaunch robogpt_agents agents_bringup.launch bot:=sim
+roslaunch robogpt_agents agents_bringup.launch robot_name:=sim
 ```
-- Running simulation
+- Running simulation from orangewood sim_stack package
 ```
 roslaunch owl_bringup bringup.launch gripper:=robotiq2f85 world:=table  camera:=on sim:=on time:=5
 ```
 
-- Running hardware Interface
+- Running hardware Interface from robogpt_hardware_stack
 ```
 roslaunch hardware_bringup bringup.launch type:=moveit driver:=robotiq
 ```
