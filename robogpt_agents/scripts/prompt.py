@@ -44,8 +44,8 @@ base_dir = f"/home/{os.getlogin()}/orangewood_ws/src"
 sys.path.append(base_dir)  # Add base directory to system path
 
 # Paths to tool configuration and robot configuration files
-skill_path = os.path.join(base_dir, "robogpt_v3/robogpt_config/tools_config/app_list.json")
-config_file = os.path.join(base_dir, "robogpt_v3/robogpt_config/robot_config/robogpt.json")
+skill_path = os.path.join(base_dir, "robogpt_v3/robogpt_agents/config/tools_config/app_list.json")
+config_file = os.path.join(base_dir, "robogpt_v3/robogpt_agents/config/robot_config/robogpt.json")
 module_name = f'robogpt_apps.scripts.base_applications'
 
 ################################
@@ -84,7 +84,7 @@ def local_prompt():
     Returns:
         tuple: A tuple containing the prompt text and its associated ID.
     """
-    output_file = os.path.join(base_dir, "robogpt_v3/robogpt_config/tools_config/output.json")
+    output_file = os.path.join(base_dir, "robogpt_v3/robogpt_agents/config/tools_config/output.json")
     command = "pusher channels apps subscribe --app-id 1828565 --channel private-chat"
 
     # Execute the command to subscribe to the Pusher channel and process the output
