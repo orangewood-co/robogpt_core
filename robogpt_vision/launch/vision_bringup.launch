@@ -6,5 +6,5 @@
     <!-- Launching the vision startup node -->
     <node pkg="robogpt_vision" type="vision_startup.py" name="start_vision" output="screen">    
     </node>
-
+    
 </launch>

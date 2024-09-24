@@ -1,9 +1,71 @@
 <launch>
-  <!-- Run a node from a package -->
-  <node 
-      pkg="robogpt_agents" 
-      type="test.py" 
-      name="test" 
-      output="screen">
-  </node>
+  <!-- Declaring arguments with default values -->
+
+  <!-- Core robogpt arguments -->
+  <arg name="robot_name" default="my_robot"/>         <!--Option: owl68, sim, owl65, ec, cs-->
+  <arg name="use_sim" default="True"/>               <!--Options True or False-->
+
+  <!-- Simulation args -->
+  <arg name="gripper" default="robotiq2f85" />        <!-- Option: vacuum, pneumatic,robotiq2f85 -->
+  <arg name="world" default="empty" />                <!-- Option: empty, stand,table -->
+  <arg name="camera" default="on" />                  <!-- Option: empty, stand,table -->
+  <arg name="sim" default="on" />                     <!-- Option: simulation ON or OFF -->
+  <arg name="time" default="5" />                     <!-- Option: Time to launch MoveIt -->
+
+
+  <!-- Set the type of run and running arguments -->
+  <arg name="type" default="description" />           <!-- Option: description or moveit -->
+  <arg name="driver" default="both" />                <!-- Option: both,None,  robotiq or moveit -->
+  <arg name="time" default="5" />                     <!-- Option: Time to launch MoveIt -->
+  <arg name="controller" default="simple" />          <!-- Options: fake, simple, or ros_control -->
+    
+  <!-- Declare arguments for robot description  -->
+  <arg name="rviz" default="true"/>                   <!-- Option: setup the rviz True or False -->
+  <arg name="js_pub" default="false"/>                <!-- Option: Use the fake joint states True or False -->
+  <arg name="bot" default="owl6.5"/>                  <!-- Option: Bot model owl6.5 or elite -->
+  <arg name="dual_bot" default="false"/>              <!-- Option: Dual bot setup True or False -->
+  <arg name="camera_model" default="d435"/>           <!-- Option: Camera model d435 or d414 -->
+  <arg name="gripper_model" default="robotiq"/>       <!-- Option: robotiq, pneumatic, spring loaded, dummy -->
+  <arg name="stand_model" default="robogpt_stand"/>   <!-- Option: robogpt_stand or camera_stand -->
+  <arg name="cams" default="two"/>                    <!-- Option: number of cams need to use: one or two -->
+
+
+  <!-- RUNNING LAUNCH FILES -->
+
+  <!-- Running simulation -->
+  <include file="$(find owl_bringup)/launch/bringup.launch" if="$(arg use_sim)" >
+    <arg name="gripper" value="$(arg gripper)"/>
+    <arg name="world" value="$(arg world)"/>
+    <arg name="camera" value="$(arg camera)"/>
+    <arg name="sim" value="$(arg sim)"/>
+    <arg name="time" value="$(arg time)"/>
+  </include>
+
+  <!-- Running real hardware till use_sim is false -->
+  <include file="$(find hardware_bringup)/launch/bringup.launch" >
+    <arg name="type" value="$(arg type)" />
+    <arg name="driver" value="$(arg driver)" />
+    <arg name="time" value="$(arg time)" />
+    <arg name="controller" value="$(arg controller)" />
+
+    <arg name="rviz" value="$(arg rviz)"/>
+    <arg name="js_pub" value="$(arg js_pub)"/>
+    <arg name="bot" value="$(arg bot)"/>
+    <arg name="dual_bot" value="$(arg dual_bot)"/>
+    <arg name="camera_model" value="$(arg camera_model)"/>
+    <arg name="gripper_model" value="$(arg gripper_model)"/>
+    <arg name="stand_model" value="$(arg stand_model)"/>
+    <arg name="cams" value="$(arg cams)"/>
+
+  </include>
+
+  <!-- Run the vision stack -->
+  <include file="$(find robogpt_vision)/launch/vision_bringup.launch">
+  </include>
+
+  <!-- Running the agents to control bot -->
+  <include file="$(find robogpt_agents)/launch/agent_bringup.launch">
+    <arg name="robot_name" value="$(arg robot_name)"/>
+  </include>
+
 </launch>
