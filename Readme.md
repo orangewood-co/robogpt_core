@@ -105,7 +105,7 @@ roslaunch robogpt_vision vision_bringup.launch
 ```
 - Running agent stack
 ```
-roslaunch robogpt_agents agents_bringup.launch robot_name:=sim
+roslaunch robogpt_agents agent_bringup.launch robot_name:=sim
 ```
 - Running simulation from orangewood sim_stack package
 ```

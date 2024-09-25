@@ -6,6 +6,8 @@ import importlib
 import rospy, rospkg
 import subprocess 
 import multiprocessing
+import pyrealsense2 as rs
+
 
 rospack = rospkg.RosPack()
 package_path = rospack.get_path('robogpt_vision')   
@@ -34,6 +36,25 @@ def init_obj_detection(cam_name):
     obj_detection = object_detection(cam_name)
     obj_detection._run()
     
+def check_realsense_cameras():
+    # Create a context object for RealSense devices
+    context = rs.context()
+    
+    # Get a list of all connected devices
+    devices = context.query_devices()
+    
+    # Check if any devices are connected
+    if len(devices) > 0:
+        print(f"Number of RealSense cameras connected: {len(devices)}")
+        for i, device in enumerate(devices):
+            print(f"Camera {i + 1}:")
+            print(f"  Name: {device.get_info(rs.camera_info.name)}")
+            print(f"  Serial Number: {device.get_info(rs.camera_info.serial_number)}")
+            print(f"  Firmware Version: {device.get_info(rs.camera_info.firmware_version)}")
+        return
+    else:
+        print("No RealSense cameras are connected.")
+
 
 if __name__ == '__main__':
     try:

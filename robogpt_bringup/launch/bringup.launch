@@ -3,7 +3,7 @@
 
   <!-- Core robogpt arguments -->
   <arg name="robot_name" default="my_robot"/>         <!--Option: owl68, sim, owl65, ec, cs-->
-  <arg name="use_sim" default="True"/>               <!--Options True or False-->
+  <arg name="use_sim" default="true"/>               <!--Options True or False-->
 
   <!-- Simulation args -->
   <arg name="gripper" default="robotiq2f85" />        <!-- Option: vacuum, pneumatic,robotiq2f85 -->
@@ -41,7 +41,7 @@
   </include>
 
   <!-- Running real hardware till use_sim is false -->
-  <include file="$(find hardware_bringup)/launch/bringup.launch" >
+  <include file="$(find hardware_bringup)/launch/bringup.launch" unless="$(arg use_sim)">
     <arg name="type" value="$(arg type)" />
     <arg name="driver" value="$(arg driver)" />
     <arg name="time" value="$(arg time)" />
