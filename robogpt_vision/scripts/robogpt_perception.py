@@ -236,9 +236,10 @@ class object_detection_implementation:
             detection_results = {}
             i = 0
             if self.color_frame is None: # If the camera feed is None
-                print("No frame") 
+                rospy.logerr("No frame detected. Please check the Topic name.") 
                 time.sleep(0.1)
-                continue
+                rospy.logerr("Exiting Vision stack")
+                break
 
             color_frame_copy = np.copy(self.color_frame)
             depth_frame_copy = np.copy(self.depth_frame)

@@ -3,7 +3,8 @@
 
   <!-- Core robogpt arguments -->
   <arg name="robot_name" default="my_robot"/>         <!--Option: owl68, sim, owl65, ec, cs-->
-  <arg name="use_sim" default="true"/>               <!--Options True or False-->
+  <arg name="use_sim" default="true"/>                <!--Options True or False-->
+  <arg name="sim_vision" default="off"/>               <!--argument to use detcttion in simulation. Options : on / off-->
 
   <!-- Simulation args -->
   <arg name="gripper" default="robotiq2f85" />        <!-- Option: vacuum, pneumatic,robotiq2f85 -->
@@ -17,7 +18,7 @@
   <arg name="driver" default="both" />                <!-- Option: both,None,  robotiq or moveit -->
   <arg name="time" default="5" />                     <!-- Option: Time to launch MoveIt -->
   <arg name="controller" default="simple" />          <!-- Options: fake, simple, or ros_control -->
-    
+  
   <!-- Declare arguments for robot description  -->
   <arg name="rviz" default="true"/>                   <!-- Option: setup the rviz True or False -->
   <arg name="js_pub" default="false"/>                <!-- Option: Use the fake joint states True or False -->
@@ -60,6 +61,7 @@
 
   <!-- Run the vision stack -->
   <include file="$(find robogpt_vision)/launch/vision_bringup.launch">
+    <arg name="sim_vision" value="$(arg sim_vision)"/> 
   </include>
 
   <!-- Running the agents to control bot -->

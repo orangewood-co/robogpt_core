@@ -62,7 +62,7 @@ def modify_yaml_file(filename, camera_name, serial,i):
     # Construct the full path to the YAML file
     yaml_file_path = os.path.join(package_path,"config/camera_params.yaml")
 
-    rospy.logwarn("YAML File Path: %s", yaml_file_path)
+    rospy.loginfo("Camera Info Saved.")
     
     # Read the existing YAML file
     if not os.path.exists(yaml_file_path):
