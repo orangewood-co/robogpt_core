@@ -34,7 +34,7 @@ mkdir -p ~/orangewood_ws/src
 cd ~/orangewood_ws/src
 
 # Cloning the main core packages
-git clone git@bitbucket.org:owl-dev/robogpt-v3.git
+git clone git@bitbucket.org:owl-dev/robogpt_v3.git
 
 # Cloning the additional supporting packages
 git clone git@bitbucket.org:owl-dev/robot_drivers.git

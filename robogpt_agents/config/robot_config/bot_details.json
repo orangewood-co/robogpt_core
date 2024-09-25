@@ -1,4 +1,12 @@
 { 
+
+    "bot_list":[
+        "68",
+        "65",
+        "ec",
+        "sim",
+        "cs"
+    ],
     "sim": {
         "robot_group": "arm",
         "gripper_group": "gripper"
