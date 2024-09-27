@@ -31,8 +31,9 @@
 
 
   <!-- RUNNING LAUNCH FILES -->
-
-  <!-- Running simulation -->
+  <node pkg="robogpt_bringup" type="bringup_art.py" name="Welcome_msg" output="screen">    
+  </node>
+    
   <include file="$(find owl_bringup)/launch/bringup.launch" if="$(arg use_sim)" >
     <arg name="gripper" value="$(arg gripper)"/>
     <arg name="world" value="$(arg world)"/>
@@ -64,9 +65,13 @@
     <arg name="sim_vision" value="$(arg sim_vision)"/> 
   </include>
 
+  <!-- Sending the video feed to web pub sub -->
+  <node pkg="robogpt_vision" type="web_feed.py" name="web_feed" >    
+  </node>
+
   <!-- Running the agents to control bot -->
   <include file="$(find robogpt_agents)/launch/agent_bringup.launch">
     <arg name="robot_name" value="$(arg robot_name)"/>
-  </include>
+  </include> 
 
 </launch>

@@ -1,8 +1,14 @@
 import os
 import re
+import json
+import rospkg
+
+rospack = rospkg.RosPack()
+package_path = rospack.get_path('robogpt_agents')
 
 # Load the .env file path
 dotenv_path =  'robogpt-webapp-latest/.env'
+json_file_path = os.path.join(package_path, "config", "robot_config", "robogpt.json")
 
 # Function to prompt the user for a single string input in the given format
 def get_input_from_string():
@@ -25,6 +31,26 @@ def get_input_from_string():
         }
     else:
         raise ValueError("Invalid input format. Please follow the correct format.")
+    
+
+# Function to update the robogpt.json file with new values
+def update_json_file(new_values):
+    # Load the current contents of the robogpt.json file
+    with open(json_file_path, 'r') as json_file:
+        data = json.load(json_file)
+
+    # Update the specific keys in the JSON file
+    data['app_id'] = new_values['PUSHER_APP_ID']
+    data['key'] = new_values['PUSHER_SECRET']
+    data['secret'] = new_values['NEXT_PUBLIC_PUSHER_KEY']
+    data['cluster'] = new_values['NEXT_PUBLIC_PUSHER_CLUSTER']
+
+    # Write the updated data back to the JSON file
+    with open(json_file_path, 'w') as json_file:
+        json.dump(data, json_file, indent=4)
+
+    print(f"Updated {json_file_path} with new values.")
+
 
 # Function to update the .env file manually
 def update_env_file(new_values):
@@ -65,7 +91,10 @@ def main():
 
     # Update the .env file with the new values
     update_env_file(new_values)
+    update_json_file(new_values)
     print("\n.env file has been updated.")
+    print("\njson file has been updated.")
+
 
 if __name__ == "__main__":
     main()

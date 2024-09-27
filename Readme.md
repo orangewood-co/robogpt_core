@@ -26,8 +26,15 @@ After installing ROS Noetic in the host PC, we can setup a ROS workspace to buil
 
 Setup Bitbucket ssh key. Use this link for [ssh-setup Tutorial](https://support.atlassian.com/bitbucket-cloud/docs/set-up-personal-ssh-keys-on-linux/)
 
+Download Pusher using this link [Pusher-cli](https://github.com/pusher/cli/releases?_gl=1*g4kqg7*_gcl_au*NDI0Njc4NDQ3LjE3MjE3NjA2Mjc.)
+
+**This step is only if you are using Robogpt-Webapp on Local host**
+
+Go to [pusher_dashboard](https://dashboard.pusher.com/) and create an channel to get pusher credentials for setting up local host.
+use this [pusher_tut](https://youtu.be/5rAlSopSdpw?si=Pk7BQIidggV_LPGB)
 
 
+Run these commands in terminal
 ```
 mkdir -p ~/orangewood_ws/src
 
@@ -47,7 +54,6 @@ git clone git@bitbucket.org:owl-dev/robogpt_hardware_stack.git
 git clone git@bitbucket.org:owl-dev/orangewood_simstack.git
 
 ** Note: You might need to setup some external dependencies for these supporting packages.Please Go through each individual readme of these repositories
-
 
 cd ~/orangewood_ws
 
@@ -72,13 +78,26 @@ source /home/$USER/.bashrc
 sudo apt-get install ros-$ROS_DISTRO-realsense2-camera
 ```
 
-#### 2. Installation of backend related depdencies
+#### 2.1 Installation of backend related depdencies
 - Run `backend.sh` to setup the pusher, stacy and other depdencies
 ```
 cd ~/orangewood_ws/src/robogpt_v3/robogpt_bringup/setup/
-./backend_setup.sh
+sudo ./backend_setup.sh
 
 ```
+**While running backend setup you need to setup the pusher key. Use the default pusher key present in `keys.txt` for using production Robogpt webapp**
+
+#### 2.2 Installation and setup of frontend for Running Robogpt-Webapp on local host
+Run `frontend.sh` file to clone and setup the robogpt-webapp in your local machine
+```
+sudo chmod +x frontend_setup/frontend_setup.sh frontend_setup/pusher_key_update.py  # Making these two files executables
+
+sudo ./frontend_setup/frontend_setup.sh
+
+python3 frontend_setup/pusher_key_update.py  # Enter your pusher credentials here app-id, key, cluster and secret
+
+```
+
 #### 3. Install pip depdencies
 ```
 pip3 install -r requirements.txt

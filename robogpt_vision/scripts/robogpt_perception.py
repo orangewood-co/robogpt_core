@@ -65,6 +65,7 @@ class object_detection_implementation:
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber(f"/{self.cam_name}/color/image_raw", Image, self.color_callback)
         self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/depth/image_rect_raw", Image, self.depth_callback)
+        self.detect_pub = rospy.Publisher(f"/{self.cam_name}_frame",Image,queue_size=10)
         self.color_frame = None
         self.depth_frame = None
 
@@ -287,6 +288,13 @@ class object_detection_implementation:
 
             frame_data = color_frame_copy.tobytes()
             cv2.imshow(f'{self.cam_name+"_frame"}', color_frame_copy)
+            
+            # Convert the OpenCV image (BGR format) to a ROS Image message
+            detection_feed = self.bridge.cv2_to_imgmsg(color_frame_copy, "bgr8")
+        
+            # Publish the ROS Image message
+            self.detect_pub.publish(detection_feed)
+
             elapsed_time = time.time() - start_time
             if not image_sent and elapsed_time > 20:
                 image_sent = True

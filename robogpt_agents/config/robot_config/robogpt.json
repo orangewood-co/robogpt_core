@@ -5,79 +5,10 @@
     "aruco_detection": [
         "True"
     ],
-    "camera_list": {
-        "204222062672": "10.42.0.54"
-    },
-    "objects_to_detect": [
-        "sprite",
-        "coke",
-        "Glass",
-        "Vodka",
-        "Whiskey",
-        "Gin",
-        "Rum",
-        "tonic",
-        "OJ"
-    ],
-    "available_fruits": [
-        "apple",
-        "banana",
-        "pear",
-        "orange"
-    ],
-    "available_drinks": [
-        "Whiskey Cola",
-        "Gin Tonic",
-        "Cuba Libre",
-        "Screwdriver",
-        "Lemon-Lime Rum Cooler",
-        "Orange Blossom",
-        "Vodka Tonic"
-    ],
-    "ingredients": {
-        "Whiskey Cola": {
-            "spirit": "Whiskey",
-            "spirit_quantity": "2 times (60ml)",
-            "mixer": "cola",
-            "mixer_quantity": "4-6 times (120-180ml)"
-        },
-        "Gin Tonic": {
-            "spirit": "Gin",
-            "spirit_quantity": "2 times (60ml)",
-            "mixer": "tonic",
-            "mixer_quantity": "4-6 times (120-180ml)"
-        },
-        "Cuba Libre": {
-            "spirit": "Rum",
-            "spirit_quantity": "2 times (60ml)",
-            "mixer": "cola",
-            "mixer_quantity": "4-6 times (120-180ml)"
-        },
-        "Screwdriver": {
-            "spirit": "Vodka",
-            "spirit_quantity": "2 times (60ml)",
-            "mixer": "orange juice",
-            "mixer_quantity": "4-6 times (120-180ml)"
-        },
-        "Lemon-Lime Rum Cooler": {
-            "spirit": "Rum",
-            "spirit_quantity": "2 times (60ml)",
-            "mixer": "tonic",
-            "mixer_quantity": "4-6 times (120-180ml)"
-        },
-        "Orange Blossom": {
-            "spirit": "Gin",
-            "spirit_quantity": "2 times (60ml)",
-            "mixer": "orange juice",
-            "mixer_quantity": "4-6 times (120-180ml)"
-        },
-        "Vodka Tonic": {
-            "spirit": "Vodka",
-            "spirit_quantity": "2 times (60ml)",
-            "mixer": "tonic",
-            "mixer_quantity": "4-6 times (120-180ml)"
-        }
-    },
+    "app_id": "1828565",
+    "key": "7881fafa53083fd8c86b",
+    "secret": "b016ae4c24ad125b4b58",
+    "cluster": "ap2",
     "camera_config": {
         "top": {
             "camera_index": "204222062672",
@@ -119,6 +50,5 @@
     "velocity_scaling": 0.2,
     "use_moveit": false,
     "new_weights": "",
-    "old_data_set": "auto_train_data/train_v20240703194007",
-    "user_id": "user_2angxdHpYjM0exhi8kIASZB8l5H"
+    "old_data_set": "auto_train_data/train_v20240703194007"
 }

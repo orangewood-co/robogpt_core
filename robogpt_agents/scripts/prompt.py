@@ -11,7 +11,9 @@ from langchain.prompts import PromptTemplate, chat, load_prompt
 from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.agents import initialize_agent, Tool, AgentType
 import os,json,requests,sys
+import pusher  # For real-time web socket communication
 import spacy
+import subprocess
 
 
 # Load the English NLP model from spaCy
@@ -23,21 +25,6 @@ endpoint = "https://api.cognitive.microsofttranslator.com"
 location = "centralindia"
 
 # Import subprocess for executing shell commands
-import subprocess
-import pusher  # For real-time web socket communication
-
-## Pusher Credentials ##
-app_id = "1828565"  # Pusher application ID
-key = "7881fafa53083fd8c86b"  # Pusher key
-secret = "b016ae4c24ad125b4b58"  # Pusher secret
-cluster = "ap2"  # Pusher cluster
-###############################
-
-# Initialize the Pusher client with the provided credentials
-pusher_client = pusher.Pusher(
-    app_id=app_id, key=key, secret=secret, cluster=cluster)
-
-###############################
 
 # Define JSON file paths for configuration
 base_dir = f"/home/{os.getlogin()}/orangewood_ws/src"
@@ -49,6 +36,30 @@ config_file = os.path.join(base_dir, "robogpt_v3/robogpt_agents/config/robot_con
 module_name = f'robogpt_apps.scripts.base_applications'
 
 ################################
+def read_json_file(file_path):
+    # Read and load the JSON file
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return data
+
+def extract_keys(data):
+    # Extract app_id, key, secret, and cluster from the JSON data
+    app_id = data.get("app_id")
+    key = data.get("key")
+    secret = data.get("secret")
+    cluster = data.get("cluster")
+    
+    return app_id, key, secret, cluster
+###############################
+
+# Initialize the Pusher client with the provided credentials
+data = read_json_file(config_file)
+app_id, key, secret, cluster = extract_keys(data)
+pusher_client = pusher.Pusher(
+    app_id=app_id, key=key, secret=secret, cluster=cluster)
+
+###############################
+
 def reload_bot_control():
     """
     Reloads the bot control settings by loading tool configurations and 
@@ -85,7 +96,7 @@ def local_prompt():
         tuple: A tuple containing the prompt text and its associated ID.
     """
     output_file = os.path.join(base_dir, "robogpt_v3/robogpt_agents/config/tools_config/output.json")
-    command = "pusher channels apps subscribe --app-id 1828565 --channel private-chat"
+    command = f"pusher channels apps subscribe --app-id {app_id} --channel private-chat"
 
     # Execute the command to subscribe to the Pusher channel and process the output
     process = subprocess.Popen(
