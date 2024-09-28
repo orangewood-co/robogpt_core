@@ -1,0 +1,16 @@
+PUSHER_APP_ID=1828565
+PUSHER_SECRET=7881fafa53083fd8c86b
+NEXT_PUBLIC_PUSHER_KEY=b016ae4c24ad125b4b58
+NEXT_PUBLIC_PUSHER_CLUSTER=ap2
+
+# Azure Cognitive Services credentials for translation
+AZURE_KEY =4def1954ca074a149e643e2fb8fd9561
+AZURE_ENDPOINT=https://api.cognitive.microsofttranslator.com
+AZURE_LOCATION=centralindia
+
+DEPLOYMENT_NAME=robotgpt4-test
+OPENAI_API_BASE=https://robotgpt4-test.openai.azure.com/
+OPENAI_API_KEY=dded2f3a90864ab4a25e25a34cd70f5e  
+OPENAI_API_TYPE=azure
+OPENAI_API_VERSION=2023-08-01-preview
+TEMPERATURE=0.7
