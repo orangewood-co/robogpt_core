@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import yaml
 import uuid
 import dotenv
 import rospkg
@@ -11,6 +12,19 @@ rospack = rospkg.RosPack()
 base_agent = rospack.get_path('robogpt_agents')
 sys.path.append(base_agent)
 ################################
+
+
+def load_yaml_env_variables(yaml_file):
+    # Load the environment variables from the YAML file into os.environ
+    with open(yaml_file, 'r') as file:
+        env_vars = yaml.safe_load(file)
+    
+    # Set the environment variables and return them as a dictionary
+    for key, value in env_vars.items():
+        os.environ[key] = str(value)  # Ensure values are strings for os.environ
+    
+    return env_vars
+
 def send_msg(pusher_client,message):
     """
     Sends a message to a specified Pusher channel.

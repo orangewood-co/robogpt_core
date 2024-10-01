@@ -3,10 +3,9 @@
 import rospy
 import asyncio
 import importlib
-import requests
 import json
-import uuid
 import rospkg
+import getpass
 import os, sys, json, importlib
 from langchain.prompts import PromptTemplate, chat, load_prompt
 from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
@@ -26,24 +25,21 @@ NEXT_PUBLIC_PUSHER_KEY=None
 NEXT_PUBLIC_PUSHER_CLUSTER=None
 
 # openai keys
-DEPLOYMENT_NAME=None
-OPENAI_API_BASE=None
+AI_MODEL=None
 OPENAI_API_KEY=None  
-OPENAI_API_TYPE=None
-OPENAI_API_VERSION=None
-TEMPERATURE=None
+AI_TEMPERATURE=None
+ORGANIZATION =None
 
 ###################################################################################
 #          Setting up paths for imports
 ###################################################################################
 rospack = rospkg.RosPack()
 agent_base_path = rospack.get_path('robogpt_agents')
-robogpt_env_path = os.path.join(agent_base_path,"config",".robogpt_env")
+robogpt_env_path = os.path.join(agent_base_path,"config",".env")
 keys = agent_utils.load_env_variables(robogpt_env_path)
 
-
 # Define base_dir for getting the exact path of skills/applications
-base_dir = f"/home/{os.getlogin()}/orangewood_ws/src"
+base_dir = f"/home/{getpass.getuser()}/orangewood_ws/src"
 sys.path.append(base_dir)  # Add base directory to system path
 
 # Paths to tool configuration and robot configuration files
@@ -110,7 +106,6 @@ async def connect():
         traceback.print_exc()       # Print the traceback for debugging
         print("Error:", e)          # Log the error
 
-
 if __name__=="__main__":
 
     # Initialize the Pusher client with the provided credentials
@@ -118,14 +113,7 @@ if __name__=="__main__":
         app_id=keys['PUSHER_APP_ID'], key=keys['NEXT_PUBLIC_PUSHER_KEY'], secret=keys['PUSHER_SECRET'], cluster=keys['NEXT_PUBLIC_PUSHER_CLUSTER'])
     
     # Initialize the AzureChatOpenAI model with the specified parameters
-    llm = AzureChatOpenAI(
-        deployment_name=keys['DEPLOYMENT_NAME'],            # The deployment name for the model
-        openai_api_base=keys['OPENAI_API_BASE'],            # Base URL for the OpenAI API
-        openai_api_key=keys['OPENAI_API_KEY'],              # API key for authentication
-        openai_api_type=keys['OPENAI_API_TYPE'],            # Specify Azure as the API type
-        openai_api_version=keys['OPENAI_API_VERSION'],      # API version
-        temperature=keys['TEMPERATURE'],                     # Sampling temperature for response variability
-    )
+    llm = ChatOpenAI(model=keys['AI_MODEL'], temperature=keys['AI_TEMPERATURE'],organization=['ORGANIZATION'], openai_api_key=keys['OPENAI_API_KEY'])
 
 
     # Get the function objects for each tool based on the skill list
@@ -135,6 +123,7 @@ if __name__=="__main__":
     agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
     # Initialize the ROS node for this script
+
     # Main loop to continuously connect and process prompts
     while True:
         asyncio.get_event_loop().run_until_complete(connect())  # Run the connection process

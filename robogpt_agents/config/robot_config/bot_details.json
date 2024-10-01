@@ -12,11 +12,14 @@
         "gripper_group": "gripper"
     },
     
-    "owl6.5": {
+    "owl65": {
         "robot_ip": "10.42.0.53"
 
     },
-    
+    "owl68": {
+        "robot_ip": "10.42.0.54"
+
+    },
     "ec63": {
         "robot_ip":"190.162.0.24"
     }
