@@ -14,6 +14,8 @@ import os,json,requests,sys
 import pusher  # For real-time web socket communication
 import subprocess
 import agent_utils
+import traceback
+import signal
 
 ###################################################################################
 #           Initializing keys
@@ -29,7 +31,7 @@ AI_MODEL=None
 OPENAI_API_KEY=None  
 AI_TEMPERATURE=None
 ORGANIZATION =None
-
+KEEP_RUNNING = True
 ###################################################################################
 #          Setting up paths for imports
 ###################################################################################
@@ -82,6 +84,14 @@ def agent_run(promt):
     print("prompt::::::", promt)        # Print the prompt for debugging
     return agent.run(f'''{promt}''')    # Run the agent with the prompt
 
+def signal_handler(sig, frame):
+    """
+    Handles the Ctrl+C signal and stops the main loop.
+    """
+    global keep_running
+    print("Ctrl+C detected! Shutting down gracefully...")
+    KEEP_RUNNING = False
+
 
 # Rest of your setup and WebSocket connection code
 async def connect():
@@ -108,6 +118,9 @@ async def connect():
 
 if __name__=="__main__":
 
+    # Register the signal handler for Ctrl+C
+    signal.signal(signal.SIGINT, signal_handler)
+
     # Initialize the Pusher client with the provided credentials
     pusher_client = pusher.Pusher(
         app_id=keys['PUSHER_APP_ID'], key=keys['NEXT_PUBLIC_PUSHER_KEY'], secret=keys['PUSHER_SECRET'], cluster=keys['NEXT_PUBLIC_PUSHER_CLUSTER'])
@@ -125,5 +138,11 @@ if __name__=="__main__":
     # Initialize the ROS node for this script
 
     # Main loop to continuously connect and process prompts
-    while True:
-        asyncio.get_event_loop().run_until_complete(connect())  # Run the connection process
+    while KEEP_RUNNING:
+        try:
+            asyncio.get_event_loop().run_until_complete(connect())  # Run the connection process
+        except Exception as e:
+            traceback.print_exc()
+            print("An error occurred:", e)
+
+    print("Shutdown complete.")
