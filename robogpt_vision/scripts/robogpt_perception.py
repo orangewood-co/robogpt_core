@@ -32,24 +32,23 @@ class object_detection_implementation:
     Skill for object detection and feature extraction in a robotic system's scene.
 
     This class provides functionality for detecting objects in a camera stream, extracting
-    relevant features using detection algorithms. It subscribes to an MQTT broker
+    relevant features using detection algorithms. It subscribes to an ROS Topic
     to receive color and depth data from a robot's camera, performs object detection using
     specified algorithms, and extracts object features.
 
     Attributes:
         serial (str): The serial number of the robot's camera.
-        client (mqtt_client.Client): MQTT client for communication with the robot.
         color_frame (numpy.ndarray): The last received color frame from the robot's camera.
         depth_frame (numpy.ndarray): The last received depth frame from the robot's camera.
         zero_shot (ZeroShotDetection): An object for zero-shot object detection.
         color_detection (ColorDetection): An object for color-based object detection.
 
     Methods:
-        on_connect(client, userdata, flags, rc):
-            Callback function for handling MQTT broker connection.
+        color_callback(data):
+            Callback function for handling color image from ROS topic data subscription.
 
-        on_message(client, userdata, msg):
-            Callback function for handling MQTT messages, updating color and depth frames.
+        depth_callback(data):
+            Callback function for handling depth image from ROS topic data subscription.
 
         extract_3d_info(detection_result: dict, color_frame: numpy.ndarray, depth_frame: numpy.ndarray) -> dict:
             Extracts dimensions and orientation using 3D point cloud of object and save the results in the detection_result.
@@ -61,10 +60,14 @@ class object_detection_implementation:
 
         self.cam_name = rospy.get_param("/Object_detection_node/camera_name",default="camera")
         rospy.loginfo(f"Name of the camera running:: {self.cam_name}")
-
+        self.vision_sim = rospy.get_param("vision_sim", default="off")
+        if self.vision_sim == "off":
+            self.topic_suffix = "image_rect_raw"
+        if self.vision_sim == "on":
+            self.topic_suffix = "image_raw"
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber(f"/{self.cam_name}/color/image_raw", Image, self.color_callback)
-        self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/depth/image_rect_raw", Image, self.depth_callback)
+        self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/depth/{self.topic_suffix}", Image, self.depth_callback)
         self.detect_pub = rospy.Publisher(f"/{self.cam_name}_frame",Image,queue_size=10)
         self.color_frame = None
         self.depth_frame = None

@@ -11,6 +11,7 @@
         "save_pose",
         "pick_object",
         "place_object",
-        "check_pose"
+        "check_pose",
+        "test_function"
     ]
 }
