@@ -107,24 +107,34 @@ pip3 install -r requirements.txt
 
 #### Camera setup
 ```
-roslaunch robogpt_vision camera_setup.launch
+roslaunch robogpt_vision camera_setup.launch type:=stereo 
+# Type args is for type of camera stereo (realsense) or rbg 
 ```
 
 #### Running robogpt bringup 
 ```
-roslaunch robogpt_bringup bringup.launch robot_name:=sim 
-
+roslaunch robogpt_bringup bringup.launch robot_name:=sim use_case:=base use_sim:=true sim_vision:=on
 ```
-Current options for bots:- owl_68, owl_65, ec66, ec612, ec63 and sim for simulation
+- Current options for bots:- owl_68, owl_65, ec66, ec612, ec63 and sim for simulation
+
+- Current options for use_case:- base, pick_and_place, drinkbot, archform.   **Note: Base is defualt and contains basic skills**
+
+- Use_sim args decides to run the orangewood sim stack or robogpt hardware stack based on bool value
+
+- sim_vision args decides to run the detection models for simulaton or not Options : on / off : Default is off
 
 #### To run each module seperatly
 - Running vision stack
 ```
-roslaunch robogpt_vision vision_bringup.launch
+roslaunch robogpt_vision vision_bringup.launch sim_vision:=off 
+# sim_vision args decides to run the detection models for simulaton or not Options : on / off : Default is off
+
 ```
 - Running agent stack
 ```
-roslaunch robogpt_agents agent_bringup.launch robot_name:=sim
+roslaunch robogpt_agents agent_bringup.launch robot_name:=sim use_case:=base 
+# default robot_name is sim and use_case is set to base
+# base contains all the basic skills like move to pose, save pose, connect robot
 ```
 - Running simulation from orangewood sim_stack package
 ```
@@ -134,7 +144,11 @@ roslaunch owl_bringup bringup.launch gripper:=robotiq2f85 world:=table  camera:=
 - Running hardware Interface from robogpt_hardware_stack
 ```
 roslaunch hardware_bringup bringup.launch type:=moveit driver:=robotiq
+# type: moveit or  description based on user if he/she wants to use moveit or not
+# driver: robotiq, moveit, both or none. Currently for moveit we only run moveit driver for 6.8 and 6.5 
+
 ```
+
 
 ## 2) Setting Up in docker 
 
