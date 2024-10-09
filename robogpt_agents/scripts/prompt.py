@@ -51,18 +51,23 @@ skill_path = os.path.join(agent_base_path, "config/tools_config/app_list.json")
 #     Loading the Application 
 ###################################################################################
 use_case = rospy.get_param("/use_case",default="base")
-module_name = f'robogpt_apps.scripts.{use_case}_file'
+base_model = f'robogpt_apps.scripts.base.skills'
+module_name = f'robogpt_apps.scripts.{use_case}.skills'
 try:
-    rospy.loginfo("Starting")                   # Log the start of the function
+    # Log the start of the function
+    rospy.loginfo("Starting")
 
     # Load the JSON file containing tool configurations
     with open(skill_path) as f:
         data = json.load(f)
+    
     # Retrieve the function names for tools from the loaded data
-    skill_list = data["apps"]
+    base_list = data["apps"].get('base', [])              
+    specific_skill_list = data["apps"].get(use_case, [])
 
     # Dynamically import the applications module
-    applications = importlib.import_module(module_name)
+    specfic_skills = importlib.import_module(module_name)
+    base_skills = importlib.import_module(base_model)
     print("Load successful")                    # Confirm successful loading
 
 except Exception as e:
@@ -102,7 +107,7 @@ async def connect():
     try:
         # Attempt to retrieve and process a prompt
         try:
-            data, id= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])           # Get prompt and ID from local source
+            data, id= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
             output = agent_run(data)                                           # Run the agent with the retrieved prompt
             print(output)                                                      # Print the output for debugging
             agent_utils.send_msg(pusher_client=pusher_client,message=output)   # Send the output message to the Pusher channel
@@ -130,7 +135,14 @@ if __name__=="__main__":
 
 
     # Get the function objects for each tool based on the skill list
-    tools = [getattr(applications, name + "_implementation")() for name in skill_list]
+    base_tools = [getattr(base_skills, name + "_implementation")() for name in base_list]
+
+    specific_tools = [getattr(specfic_skills, name + "_implementation")() for name in specific_skill_list]
+
+    if use_case != "base":
+        tools = base_tools + specific_tools   
+    elif use_case == "base":
+        tools = base_tools
 
     # Initialize the agent with the tools and language model
     agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)

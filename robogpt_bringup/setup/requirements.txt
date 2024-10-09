@@ -96,3 +96,8 @@ imgaug==0.4.0
 albumentations==1.3.0  # Downgraded to support Pydantic 1.x
 scikit-learn==1.3.2
 
+# Requirment for robotiq gripper
+minimalmodbus
+
+# For moveit driver
+toppra
