@@ -5,7 +5,7 @@
   <arg name="robot_name" default="my_robot"/>         <!--Option: owl68, sim, owl65, ec, cs-->
   <arg name="use_sim" default="true"/>                <!--Options True or False-->
   <arg name="sim_vision" default="off"/>              <!--argument to use detcttion in simulation. Options : on / off-->
-  <agr name="use_case" default="base"/>               <!--Argument to load the right skills based on use-case -->
+  <arg name="use_case" default="base"/>               <!--Argument to load the right skills based on use-case -->
 
   <!-- Simulation args -->
   <arg name="gripper" default="robotiq2f85" />        <!-- Option: vacuum, pneumatic,robotiq2f85 -->
