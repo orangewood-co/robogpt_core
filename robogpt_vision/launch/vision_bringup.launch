@@ -10,5 +10,12 @@
     <!-- Launching the vision startup node -->
     <node pkg="robogpt_vision" type="vision_startup.py" name="start_vision">    
     </node>
+
+
+    <!-- Launching the call_getworld_service.py-->
+    <node pkg="robogpt_vision" type="call_getworld_service.py" name="call_getworld_service_node" output="screen">
+        <param name="object_name" value="$(arg object_name)"/>
+        <param name="parent_frame" value="$(arg parent_frame)"/>
+    </node>
     
 </launch>
