@@ -2,7 +2,7 @@
   <!-- Declaring arguments with default values -->
 
   <!-- Core robogpt arguments -->
-  <arg name="robot_name" default="my_robot"/>         <!--Option: owl68, sim, owl65, ec, cs-->
+  <arg name="robot_name" default="sim"/>         <!--Option: owl68, sim, owl65, ec, cs-->
   <arg name="use_sim" default="true"/>                <!--Options True or False-->
   <arg name="sim_vision" default="off"/>              <!--argument to use detcttion in simulation. Options : on / off-->
   <arg name="use_case" default="base"/>               <!--Argument to load the right skills based on use-case -->

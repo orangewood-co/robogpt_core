@@ -1,12 +1,11 @@
-import rospy
-import rospkg
-from robogpt_vision.srv import GetWorldContext, GetWorldContextResponse
+#!/usr/bin/env python3
 
-import json
 import os
 import sys
 import time
+import json
 import rospy
+import rospkg
 import tf2_ros
 import numpy as np
 from typing import Type, List
@@ -14,20 +13,25 @@ from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 from scipy.spatial.transform import Rotation as R
 from tf.transformations import euler_matrix,euler_from_matrix
+from robogpt_vision.srv import GetWorldContext, GetWorldContextResponse
 
 
 inst_matrix = np.array([[909.134765625,  0, 654.532836914062 ],
                         [  0,908.667419433594, 372.789794921875],
                         [  0, 0, 1       ]])
+                        
+##############################################################################
 
 global depth
-robot_ip = '10.42.0.54'
+rospack = rospkg.RosPack()
+vision_path = rospack.get_path('robogpt_vision') 
+agent_path = rospack.get_path('robogpt_agents') 
+detection_results_path = os.path.join(vision_path,"config/detection_results.json")
+poses_path = os.path.join(agent_path,"config/robot_config/robot_pose.json")
 
-class ximg2xbase_definition(BaseModel):
-    object_name: str = Field(description="object's name")
-    include_ort: bool = Field(default=False,description="if the object orientation needs to considered")
+###############################################################################
 
-class ximg2xbase_implementation(BaseTool):
+class ximg2xbase_implementation():
     """
     Convert image frame coordinates to robot base frame coordinates for a specific object.
 
@@ -65,14 +69,11 @@ class ximg2xbase_implementation(BaseTool):
             Async version of _run, (NOT SUPPORTED).
     """
 
-    name = "ximg2xbase_implementation"
-    description = "get the pose of the object with respect to the robot base frame"
-    args_schema: Type[BaseModel] = ximg2xbase_definition
-
     def __init__(self):
         rospy.init_node('get_world_context_service')
         service = rospy.Service('get_world_context', GetWorldContext, self._run)
         rospy.loginfo("Service 'get_world_context' is ready")
+        self.robot_name = rospy.get_param("/robot_name",default="sim")
     
     def get_package_path(self, package_name):
         # Create an instance of the rospkg.RosPack class
@@ -108,9 +109,9 @@ class ximg2xbase_implementation(BaseTool):
         """
         try:
             robogpt_vision_path = self.get_package_path('robogpt_vision')
-            robot_home_file_path = os.path.join(robogpt_vision_path,"config/robot_pose.json")
+            robot_home_file_path = poses_path
             robot_dict = json.loads(open(robot_home_file_path).read())
-            robot_dict = robot_dict[robot_ip]
+            robot_dict = robot_dict[self.robot_name]
             robot_pose = robot_dict["home"] # Extract home pose from the JSON
             return robot_pose
         except Exception as e:
@@ -130,7 +131,8 @@ class ximg2xbase_implementation(BaseTool):
         
         while not rospy.is_shutdown():
             try:
-                trans = tfBuffer.lookup_transform("top_color_optical_frame", parent_frame, rospy.Time()) # Check if transform exists
+                cam_frame = f"{camera_name}_color_optical_frame"
+                trans = tfBuffer.lookup_transform(cam_frame, parent_frame, rospy.Time()) # Check if transform exists
                 # print(f"translation : {trans}")
             except Exception as e:
                 print(f"the error is : {e}")
@@ -151,7 +153,7 @@ class ximg2xbase_implementation(BaseTool):
             return T.tolist()
     
 
-    def get_T_cam_base(self, parent_frame: str):
+    def get_T_cam_base(self, parent_frame: str,camera_name: str):
         """
         Get the transformation matrix between the camera and the robot base for the specified robot IP using TF2 Buffer.
 
@@ -171,8 +173,8 @@ class ximg2xbase_implementation(BaseTool):
         
         while not rospy.is_shutdown():
             try:
-                trans = tfBuffer.lookup_transform(parent_frame, "top_color_optical_frame", rospy.Time()) # Check if transform exists
-                # print(f"translation : {trans}")service = rospy.Service('get_world_context', GetWorldContext, self._run)
+                cam_frame = f"{camera_name}_color_optical_frame"
+                trans = tfBuffer.lookup_transform(parent_frame, cam_frame, rospy.Time()) # Check if transform exists
             except Exception as e:
                 print(f"the error is : {e}")
                 continue
@@ -191,7 +193,7 @@ class ximg2xbase_implementation(BaseTool):
 
             return T.tolist()
 
-    def get_ximg(self, object_name: str):
+    def get_ximg(self, object_name: str, camera_name: str):
         global depth
         """
         Get the object's pose in the image frame for the specified object and robot IP.
@@ -204,8 +206,8 @@ class ximg2xbase_implementation(BaseTool):
         """        
         try:
             robogpt_vision_path = self.get_package_path('robogpt_vision')
-            data = self.read_json_file(os.path.join(robogpt_vision_path,"config/detection_results.json"))
-            data = data[robot_ip]
+            data = self.read_json_file(detection_results_path)
+            data = data[camera_name]
 
             for k, v in data.items():
                 if v['detected_object'] in object_name:
@@ -218,7 +220,7 @@ class ximg2xbase_implementation(BaseTool):
             self.return_direct = True
             print("Error getting object pose in image frame: "+str(e))
             
-    def get_orientation(self, object_name: str, parent_frame: str):
+    def get_orientation(self, object_name: str, parent_frame: str,camera_name: str):
         """
         Get the object's orientation in the robot base frame for the specified object and robot IP.
 
@@ -230,7 +232,7 @@ class ximg2xbase_implementation(BaseTool):
         """
         robogpt_vision_path = self.get_package_path('robogpt_vision')
         data = self.read_json_file(os.path.join(robogpt_vision_path,"config/detection_results.json"))
-        data = data[robot_ip]
+        data = data[camera_name]
 
         for k, v in data.items():
             if v['detected_object'] in object_name:
@@ -239,7 +241,7 @@ class ximg2xbase_implementation(BaseTool):
                 ort_base = euler_from_matrix(T_cam_base @ rotation_matrix)
                 return ort_base
             
-    def get_length(self, object_name: str, parent_frame: str):
+    def get_length(self, object_name: str, parent_frame: str, camera_name: str):
         """
         Get the dimensions and orientation of the object in the robot base frame for the specified object and robot IP.
 
@@ -254,7 +256,7 @@ class ximg2xbase_implementation(BaseTool):
         
         robogpt_vision_path = self.get_package_path('robogpt_vision')
         data = self.read_json_file(os.path.join(robogpt_vision_path,"config/detection_results.json"))
-        data = data[robot_ip]
+        data = data[camera_name]
 
         for k, v in data.items():
             if v['detected_object'] in object_name:
@@ -268,7 +270,7 @@ class ximg2xbase_implementation(BaseTool):
                 ort_base = [0,0,0,1]
                 return np.abs(dim_base[:3]),ort_base
 
-    def Ximg2Xbase(self, Ximg, parent_frame: str)->np.ndarray:
+    def Ximg2Xbase(self, Ximg, parent_frame: str,camera_name)->np.ndarray:
         """
         Convert image coordinates to robot base coordinates using the transformation matrix and intrinsic matrix.
 
@@ -279,7 +281,7 @@ class ximg2xbase_implementation(BaseTool):
             np.ndarray: The converted coordinates in the robot base frame as [Xbase_x, Xbase_y, Xbase_z].
         """
         try:
-            T_cam_base = self.get_T_cam_base(parent_frame)
+            T_cam_base = self.get_T_cam_base(parent_frame,camera_name)
             Z = Ximg[2]
             Ximg = np.array([Ximg[0], Ximg[1], 1.0])
             Xcam = Z * np.linalg.inv(inst_matrix) @ Ximg
@@ -289,12 +291,6 @@ class ximg2xbase_implementation(BaseTool):
             self.return_direct = True
             print("Error converting image coordinates to robot base: "+str(e))
     
-    # def handle_get_world_context(self, req):
-    #     object = req.object_name
-    #     parent_frame = req.parent_frame
-    #     include_ort = req.include_ort if hasattr(req, 'include_ort') else False
-    #     Xbase = self._run(object, parent_frame, include_ort)
-    #     return GetWorldContextResponse(Xbase=Xbase)
 
     def _run(self, req):
         global depth
@@ -319,19 +315,18 @@ class ximg2xbase_implementation(BaseTool):
         try:
             object_name = req.object_name
             parent_frame = req.parent_frame
+            camera_name = req.camera_name
             include_ort = req.include_ort if hasattr(req, 'include_ort') else False
-
-            Ximg = self.get_ximg(object_name)
-            Xbase = self.Ximg2Xbase(Ximg, parent_frame)
-            T_cam_base = np.round(np.array(self.get_T_cam_base(parent_frame))[:3,:3])
+            Ximg = self.get_ximg(object_name,camera_name)
+            Xbase = self.Ximg2Xbase(Ximg, parent_frame,camera_name)
+            T_cam_base = np.round(np.array(self.get_T_cam_base(parent_frame,camera_name))[:3,:3])
             offset = T_cam_base @ np.array([-0.05, 0.0, -0.04])
             Xbase += offset[:3]
             home_pose = self.get_home_pose()
             orientation = home_pose[3:]
-            #tcp offsets are the dimensions of the Z-complaint gripper's dimensions
+
             tcp_offset_z = 0.17 # Height of gripper spring
             tcp_offset_y = 0.15
-            # Xbase[2] = Xbase[2] + tcp_offset_z
             Xbase[1] = Xbase[1] + tcp_offset_y
             
             Xbase = [Xbase[0], Xbase[1], Xbase[2], orientation[0], orientation[1], orientation[2]] 
