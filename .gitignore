@@ -1,3 +1,8 @@
+
+# Setup files
+robogpt_vision/config/camera_params.yaml
+robogpt_vision/config/detection_results.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 **/__pycache__/
