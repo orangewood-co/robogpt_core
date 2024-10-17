@@ -1,7 +1,7 @@
 
 <launch>
 
-    <arg name="sim_vision" default="on"/>
+    <arg name="sim_vision" default="off"/>
     <!-- loading the camera details  -->
     <rosparam command="load" file="$(find robogpt_vision)/config/camera_params.yaml"/>
     <param name="vision_sim" value="$(arg sim_vision)" />
@@ -10,5 +10,8 @@
     <!-- Launching the vision startup node -->
     <node pkg="robogpt_vision" type="vision_startup.py" name="start_vision">    
     </node>
+
+
+    <node pkg="robogpt_vision" type="get_world_context.py" name="get_world_context_service" output="screen" />
     
 </launch>
