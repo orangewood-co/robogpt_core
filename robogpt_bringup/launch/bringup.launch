@@ -3,7 +3,7 @@
 
   <!-- Core robogpt arguments -->
   <arg name="robot_name" default="sim"/>         <!--Option: owl68, sim, owl65, ec, cs-->
-  <arg name="use_sim" default="true"/>                <!--Options True or False-->
+  <arg name="use_sim" default="false"/>                <!--Options True or False-->
   <arg name="sim_vision" default="off"/>              <!--argument to use detcttion in simulation. Options : on / off-->
   <arg name="use_case" default="base"/>               <!--Argument to load the right skills based on use-case -->
 
@@ -15,8 +15,8 @@
 
 
   <!-- Set the type of run and running arguments -->
-  <arg name="type" default="description" />           <!-- Option: description or moveit -->
-  <arg name="driver" default="both" />                <!-- Option: both,None,  robotiq or moveit -->
+  <arg name="type" default="moveit" />           <!-- Option: description or moveit -->
+  <arg name="driver" default="moveit" />                <!-- Option: both,None,  robotiq or moveit -->
   <arg name="time" default="5" />                     <!-- Option: Time to launch MoveIt -->
   <arg name="controller" default="simple" />          <!-- Options: fake, simple, or ros_control -->
   
@@ -32,8 +32,8 @@
 
 
   <!-- RUNNING LAUNCH FILES -->
-  <!-- <node pkg="robogpt_bringup" type="bringup_art.py" name="Welcome_msg" output="screen">    
-  </node> -->
+  <node pkg="robogpt_bringup" type="bringup_art.py" name="Welcome_msg" output="screen">    
+  </node>
     
   <include file="$(find owl_bringup)/launch/bringup.launch" if="$(arg use_sim)" >
     <arg name="gripper" value="$(arg gripper)"/>
