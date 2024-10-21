@@ -32,8 +32,8 @@
 
 
   <!-- RUNNING LAUNCH FILES -->
-  <!-- <node pkg="robogpt_bringup" type="bringup_art.py" name="Welcome_msg" output="screen">    
-  </node> -->
+  <node pkg="robogpt_bringup" type="bringup_art.py" name="Welcome_msg" output="screen">    
+  </node>
     
   <include file="$(find owl_bringup)/launch/bringup.launch" if="$(arg use_sim)" >
     <arg name="gripper" value="$(arg gripper)"/>

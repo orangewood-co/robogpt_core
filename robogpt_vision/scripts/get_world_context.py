@@ -1,7 +1,6 @@
 import rospy
 import rospkg
 from robogpt_vision.srv import GetWorldContext, GetWorldContextResponse
-
 import json
 import os
 import sys
@@ -24,7 +23,7 @@ global depth
 robot_ip = '10.42.0.54'
 
 class ximg2xbase_definition(BaseModel):
-    object_name: str = Field(description="object's name")
+    object_name: str = Field(description="name of the object the robot need")
     include_ort: bool = Field(default=False,description="if the object orientation needs to considered")
 
 class ximg2xbase_implementation(BaseTool):
