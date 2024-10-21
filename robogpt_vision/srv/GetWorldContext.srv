@@ -1,6 +1,7 @@
 # Input
 string parent_frame
 string object_name
+string camera_name
 bool include_ort
 
 ---
