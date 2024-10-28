@@ -37,10 +37,10 @@ class object_detection_implementation:
     specified algorithms, and extracts object features.
 
     Attributes:
-        serial (str): The serial number of the robot's camera.
+        cam_name (str): Name of the camera connected.
         color_frame (numpy.ndarray): The last received color frame from the robot's camera.
         depth_frame (numpy.ndarray): The last received depth frame from the robot's camera.
-        zero_shot (ZeroShotDetection): An object for zero-shot object detection.
+        yolov8 (YoloV8Detection): An object for yolov8 based object detection.
         color_detection (ColorDetection): An object for color-based object detection.
 
     Methods:
