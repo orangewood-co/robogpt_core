@@ -67,25 +67,30 @@ if __name__ == '__main__':
             serial_number = rospy.get_param("serial_no_"+str(i), default="")
             vision_sim = rospy.get_param("vision_sim", default="off")
             camera_type = rospy.get_param("comp_name",default="intel")
-
+            rospy.logerr(camera_type)
             # Define the arguments for each launch file
             args_cams = [f'camera:={cam_name}', f'serial_no:={serial_number}']
             args_cam_name =[f'camera_name:={cam_name}']
             
             # Launch first file
-            if check_realsense_cameras():
-                if camera_type == "intel":
+            if camera_type == "intel":
+
+                if check_realsense_cameras():
                     process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
                 
-                if camera_type == "orbec":
-                    process_camera_startup = launch_with_delay('orbbec_camera gemini_330_series.launch', args_cam_name, 5)
-                    
                 process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
 
                 # Wait for all processes to complete
                 process_camera_startup.wait()
                 process_init_detection.wait()
 
+            if camera_type == "orbec":
+                process_camera_startup = launch_with_delay('orbbec_camera gemini_330_series.launch',[], 5)
+                process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
+
+                # Wait for all processes to complete
+                process_camera_startup.wait()
+                process_init_detection.wait()
 
             if not check_realsense_cameras():
                 rospy.logerr("No Cameras Detected. Please check the connected cameras if connected or switch to Simulation option")

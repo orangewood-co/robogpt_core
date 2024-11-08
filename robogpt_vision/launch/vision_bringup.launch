@@ -5,7 +5,9 @@
     <!-- loading the camera details  -->
     <rosparam command="load" file="$(find robogpt_vision)/config/camera_params.yaml"/>
     <param name="vision_sim" value="$(arg sim_vision)" />
-
+    
+    <arg name="comp_name" default="intel"/> <!-- Options : intel, orbec, or zed2i -->
+    <param name="comp_name" value="$(arg comp_name)"/>
 
     <!-- Launching the vision startup node -->
     <node pkg="robogpt_vision" type="vision_startup.py" name="start_vision">    

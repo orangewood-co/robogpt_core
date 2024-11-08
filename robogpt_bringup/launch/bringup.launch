@@ -6,6 +6,7 @@
   <arg name="use_sim" default="false"/>                <!--Options True or False-->
   <arg name="sim_vision" default="off"/>              <!--argument to use detcttion in simulation. Options : on / off-->
   <arg name="use_case" default="base"/>               <!--Argument to load the right skills based on use-case -->
+  <arg name="cam_name" default="intel"/> <!-- Options : intel, orbec, or zed2i -->
 
   <!-- Simulation args -->
   <arg name="gripper" default="robotiq2f85" />        <!-- Option: vacuum, pneumatic,robotiq2f85 -->
@@ -53,6 +54,8 @@
     <arg name="rviz" value="$(arg rviz)"/>
     <arg name="js_pub" value="$(arg js_pub)"/>
     <arg name="bot" value="$(arg bot)"/>
+    <arg name="robot_name" value="$(arg robot_name)"/>
+
     <arg name="dual_bot" value="$(arg dual_bot)"/>
     <arg name="camera_model" value="$(arg camera_model)"/>
     <arg name="gripper_model" value="$(arg gripper_model)"/>
@@ -64,6 +67,8 @@
   <!-- Run the vision stack -->
   <include file="$(find robogpt_vision)/launch/vision_bringup.launch">
     <arg name="sim_vision" value="$(arg sim_vision)"/> 
+    <arg name="comp_name" value="$(arg cam_name)"/> 
+
   </include>
 
   <!-- Sending the video feed to web pub sub -->
