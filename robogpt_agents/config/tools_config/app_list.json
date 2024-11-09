@@ -10,8 +10,7 @@
                     "get_zone_pose",
                     "move_in_trajactory",
                     "save_pose",
-                    "check_pose",
-                    "set_orientation_assumption"
+                    "check_pose"
                     ]
             ,
             "pick_and_place":[

@@ -67,25 +67,17 @@ if __name__ == '__main__':
             serial_number = rospy.get_param("serial_no_"+str(i), default="")
             vision_sim = rospy.get_param("vision_sim", default="off")
             camera_type = rospy.get_param("comp_name",default="intel")
-            rospy.logerr(camera_type)
+            
             # Define the arguments for each launch file
-            args_cams = [f'camera:={cam_name}', f'serial_no:={serial_number}']
+            args_cams = [f'camera:={cam_name}', f'serial_no:={serial_number}','align_depth:=true']
             args_cam_name =[f'camera_name:={cam_name}']
             
             # Launch first file
-            if camera_type == "intel":
+            if check_realsense_cameras():
 
-                if check_realsense_cameras():
+                if camera_type == "intel":
                     process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
                 
-                process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
-
-                # Wait for all processes to complete
-                process_camera_startup.wait()
-                process_init_detection.wait()
-
-            if camera_type == "orbec":
-                process_camera_startup = launch_with_delay('orbbec_camera gemini_330_series.launch',[], 5)
                 process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
 
                 # Wait for all processes to complete
