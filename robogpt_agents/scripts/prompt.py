@@ -53,6 +53,7 @@ skill_path = os.path.join(agent_base_path, "config/tools_config/app_list.json")
 use_case = rospy.get_param("/use_case",default="base")
 base_model = f'robogpt_apps.scripts.base.skills'
 module_name = f'robogpt_apps.scripts.{use_case}.skills'
+
 try:
     # Log the start of the function
     rospy.loginfo("Starting")
@@ -60,7 +61,7 @@ try:
     # Load the JSON file containing tool configurations
     with open(skill_path) as f:
         data = json.load(f)
-    
+
     # Retrieve the function names for tools from the loaded data
     base_list = data["apps"].get('base', [])              
     specific_skill_list = data["apps"].get(use_case, [])

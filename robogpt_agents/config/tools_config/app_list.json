@@ -16,7 +16,8 @@
             "pick_and_place":[
                 "pick_object",
                 "place_object",
-                "pick_n_place"
+                "clean_table",
+                "industry_test"
             ]
         }
 }

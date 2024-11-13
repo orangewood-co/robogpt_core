@@ -6,15 +6,11 @@
         "True"
     ],
     "objects_to_detect": [
-        "sprite",
-        "coke",
-        "Glass",
-        "Vodka",
-        "Whiskey",
-        "Gin",
-        "Rum",
-        "tonic",
-        "OJ"
+        "soap",
+        "bucket",
+        "candy",
+        "gel",
+        "duster"
     ],
     "new_weights": "",
     "old_data_set": "auto_train_data/train_v20240703194007"

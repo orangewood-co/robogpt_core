@@ -2,11 +2,12 @@
   <!-- Declaring arguments with default values -->
 
   <!-- Core robogpt arguments -->
-  <arg name="robot_name" default="sim"/>         <!--Option: owl68, sim, owl65, ec, cs-->
-  <arg name="use_sim" default="false"/>                <!--Options True or False-->
+  <arg name="robot_name" default="sim"/>              <!--Option: owl68, sim, owl65, ec, cs-->
+  <arg name="use_sim" default="false"/>               <!--Options True or False-->
   <arg name="sim_vision" default="off"/>              <!--argument to use detcttion in simulation. Options : on / off-->
   <arg name="use_case" default="base"/>               <!--Argument to load the right skills based on use-case -->
-  <arg name="cam_name" default="intel"/> <!-- Options : intel, orbec, or zed2i -->
+  <arg name="cam_name" default="intel"/>              <!-- Options : intel, orbec, or zed2i -->
+  <arg name="robot_ip" default="192.168.1.201"/>      <!-- Option: Ip address of the robot  -->
 
   <!-- Simulation args -->
   <arg name="gripper" default="robotiq2f85" />        <!-- Option: vacuum, pneumatic,robotiq2f85 -->
@@ -16,20 +17,18 @@
 
 
   <!-- Set the type of run and running arguments -->
-  <arg name="type" default="moveit" />           <!-- Option: description or moveit -->
-  <arg name="driver" default="moveit" />                <!-- Option: both,None,  robotiq or moveit -->
+  <arg name="type" default="description" />           <!-- Option: description or moveit -->
+  <arg name="driver" default="moveit" />              <!-- Option: both,None,  robotiq or moveit -->
   <arg name="time" default="5" />                     <!-- Option: Time to launch MoveIt -->
   <arg name="controller" default="simple" />          <!-- Options: fake, simple, or ros_control -->
   
   <!-- Declare arguments for robot description  -->
   <arg name="rviz" default="true"/>                   <!-- Option: setup the rviz True or False -->
   <arg name="js_pub" default="false"/>                <!-- Option: Use the fake joint states True or False -->
-  <arg name="bot" default="owl6.5"/>                  <!-- Option: Bot model owl6.5 or elite -->
   <arg name="dual_bot" default="false"/>              <!-- Option: Dual bot setup True or False -->
   <arg name="camera_model" default="d435"/>           <!-- Option: Camera model d435 or d414 -->
   <arg name="gripper_model" default="robotiq"/>       <!-- Option: robotiq, pneumatic, spring loaded, dummy -->
-  <arg name="stand_model" default="robogpt_stand"/>   <!-- Option: robogpt_stand or camera_stand -->
-  <arg name="cams" default="two"/>                    <!-- Option: number of cams need to use: one or two -->
+  <arg name="cams" default="one"/>                    <!-- Option: number of cams need to use: one or two -->
 
 
   <!-- RUNNING LAUNCH FILES -->
@@ -50,17 +49,14 @@
     <arg name="driver" value="$(arg driver)" />
     <arg name="time" value="$(arg time)" />
     <arg name="controller" value="$(arg controller)" />
-
     <arg name="rviz" value="$(arg rviz)"/>
     <arg name="js_pub" value="$(arg js_pub)"/>
-    <arg name="bot" value="$(arg bot)"/>
     <arg name="robot_name" value="$(arg robot_name)"/>
-
     <arg name="dual_bot" value="$(arg dual_bot)"/>
     <arg name="camera_model" value="$(arg camera_model)"/>
     <arg name="gripper_model" value="$(arg gripper_model)"/>
-    <arg name="stand_model" value="$(arg stand_model)"/>
     <arg name="cams" value="$(arg cams)"/>
+    <arg name="robot_ip" value="$(arg robot_ip)"/>
 
   </include>
 
@@ -72,8 +68,8 @@
   </include>
 
   <!-- Sending the video feed to web pub sub -->
-  <!-- <node pkg="robogpt_vision" type="web_feed.py" name="web_feed" >    
-  </node> -->
+  <node pkg="robogpt_vision" type="web_feed.py" name="web_feed" >    
+  </node>
 
   <!-- Running the agents to control bot -->
   <include file="$(find robogpt_agents)/launch/agent_bringup.launch">
