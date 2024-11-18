@@ -114,7 +114,7 @@ class MainApp(QWidget):
         # Logo images
         image1_label = QLabel(self)
         image2_label = QLabel(self)
-        logo = QPixmap("/home/aion/orangewood_ws/src/robogpt_v3/robogpt_bringup/scripts/White_logo.png").scaled(250, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.SmoothTransformation)
+        logo = QPixmap("robogpt_v3/robogpt_bringup/imgs/White_logo.png").scaled(250, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.SmoothTransformation)
         image1_label.setPixmap(logo)
 
         # Horizontal layout for logos (extreme left and right)
@@ -270,7 +270,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Specify path to logo image
-    logo_path = "/home/aion/orangewood_ws/src/robogpt_v3/robogpt_bringup/scripts/RoboGPT2.png"
+    logo_path = "robogpt_v3/robogpt_bringup/imgs/RoboGPT2.png"
     splash = SplashScreen(logo_path)
     splash.show()
 
