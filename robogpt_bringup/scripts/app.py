@@ -1,6 +1,8 @@
+import os
 import sys
 import time 
 import urllib
+import getpass
 import subprocess
 import rospkg,rospy
 from PySide6.QtWidgets import QApplication,QLineEdit, QWidget, QVBoxLayout, QLabel, QGraphicsOpacityEffect, QComboBox, QPushButton, QHBoxLayout, QGridLayout
@@ -8,8 +10,16 @@ from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation
 
 rospack = rospkg.RosPack()
-package_path = rospack.get_path('robogpt_vision')   
-sys.path.append(package_path)
+vision_path = rospack.get_path('robogpt_vision')
+agent_path = rospack.get_path('robogpt_agents') 
+
+sys.path.append(vision_path)
+
+# Define base_dir for getting the exact path of skills/applications
+base_img_dir = f"/home/{getpass.getuser()}/orangewood_ws/src/robogpt_v3/robogpt_bringup/imgs"
+
+main_logo_path = os.path.join(base_img_dir, "White_logo.png")
+owl_logo = os.path.join(base_img_dir, "RoboGPT2.png")
 
 def launch_with_delay(launch_file, args, delay):
     command = ['roslaunch'] + launch_file.split() + args
@@ -71,7 +81,8 @@ class MainApp(QWidget):
         super().__init__()
         self.setWindowTitle("RoboGPT - Setup")
         self.setFixedSize(1280, 720)
-
+        self.vision_config_path = os.path.join(vision_path,"config/vision_config.json")
+        self.app_list = os.path.join(agent_path,"config/tools_config/app_list.json")
         # Set up theme
         self.setStyleSheet("""
             QWidget {
@@ -96,7 +107,7 @@ class MainApp(QWidget):
                 font-size: 16px;
                 margin-top: 10px
             }
-            QPushButton:hover {        headline.setStyleSheet("color: white; font-size: 30px;")
+            QPushButton:hover {headline.setStyleSheet("color: white; font-size: 30px;")
 
                 background-color: #555555;
             }
@@ -114,7 +125,7 @@ class MainApp(QWidget):
         # Logo images
         image1_label = QLabel(self)
         image2_label = QLabel(self)
-        logo = QPixmap("robogpt_v3/robogpt_bringup/imgs/White_logo.png").scaled(250, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.SmoothTransformation)
+        logo = QPixmap(main_logo_path).scaled(250, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.SmoothTransformation)
         image1_label.setPixmap(logo)
 
         # Horizontal layout for logos (extreme left and right)
@@ -190,16 +201,25 @@ class MainApp(QWidget):
 
         # Buttons at the bottom
         button_layout = QHBoxLayout()
+        # Open Config Button
         self.open_config_button = QPushButton("Open Config File")
         self.open_config_button.clicked.connect(self.open_config_file)
+        self.open_config_button.pressed.connect(lambda: self.set_button_color(self.open_config_button, "#007BFF"))  # Blue
+        self.open_config_button.released.connect(lambda: self.set_button_color(self.open_config_button, "#333333"))  # Original
         button_layout.addWidget(self.open_config_button)
 
+        # Open App List Button
         self.open_app_list_button = QPushButton("Open App List")
         self.open_app_list_button.clicked.connect(self.open_app_list)
+        self.open_app_list_button.pressed.connect(lambda: self.set_button_color(self.open_app_list_button, "#007BFF"))  # Blue
+        self.open_app_list_button.released.connect(lambda: self.set_button_color(self.open_app_list_button, "#333333"))  # Original
         button_layout.addWidget(self.open_app_list_button)
 
+        # Start Button
         self.start_button = QPushButton("Start")
         self.start_button.clicked.connect(self.start_robogpt)
+        self.start_button.pressed.connect(lambda: self.set_button_color(self.start_button, "#007BFF"))  # Blue
+        self.start_button.released.connect(lambda: self.set_button_color(self.start_button, "#333333"))  # Original
         button_layout.addWidget(self.start_button)
 
         # Main layout
@@ -245,9 +265,40 @@ class MainApp(QWidget):
     # Placeholder functions for button actions
     def open_config_file(self):
         print("Open Config File button pressed")
+        
+        if os.path.exists(self.vision_config_path):
+            try:
+                # Use subprocess to open the file in Gedit
+                subprocess.run(["gedit", self.vision_config_path], check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error opening file: {e}")
+        else:
+            print(f"File not found: {self.vision_config_path}")
 
     def open_app_list(self):
         print("Open App List button pressed")
+        print("Open Config File button pressed")
+        
+        if os.path.exists(self.app_list):
+            try:
+                # Use subprocess to open the file in Gedit
+                subprocess.run(["gedit", self.app_list], check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error opening file: {e}")
+        else:
+            print(f"File not found: {self.app_list}")
+
+    def set_button_color(self, button, color):
+        button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {color};
+                color: #ffffff;
+                border-radius: 8px;
+                padding: 10px;
+                font-size: 16px;
+                margin-top: 10px;
+            }}
+        """)
 
     def start_robogpt(self):
         # Print all the dropdown values when start button is pressed
@@ -270,8 +321,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Specify path to logo image
-    logo_path = "robogpt_v3/robogpt_bringup/imgs/RoboGPT2.png"
-    splash = SplashScreen(logo_path)
+    splash = SplashScreen(owl_logo)
     splash.show()
 
     sys.exit(app.exec())

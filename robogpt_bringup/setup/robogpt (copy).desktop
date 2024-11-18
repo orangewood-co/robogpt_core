@@ -1,9 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Name=RoboGPT
-Comment=A shell script to run RoboGPT
-Exec=robogpt_v3/robogpt_bringup/scripts/startup.sh
-Icon=robogpt_v3/robogpt_bringup/setup/robot_inverted.png
-Terminal=true
-Type=Application
-Categories=Utility;
