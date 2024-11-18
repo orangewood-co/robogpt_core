@@ -4,7 +4,7 @@
   <!-- Core robogpt arguments -->
   <arg name="robot_name" default="sim"/>              <!--Option: owl68, sim, owl65, ec, cs-->
   <arg name="use_sim" default="false"/>               <!--Options True or False-->
-  <arg name="sim_vision" default="off"/>              <!--argument to use detcttion in simulation. Options : on / off-->
+  <arg name="sim_vision" default="on"/>              <!--argument to use detcttion in simulation. Options : on / off-->
   <arg name="use_case" default="base"/>               <!--Argument to load the right skills based on use-case -->
   <arg name="cam_name" default="intel"/>              <!-- Options : intel, orbec, or zed2i -->
   <arg name="robot_ip" default="192.168.1.201"/>      <!-- Option: Ip address of the robot  -->
@@ -35,12 +35,13 @@
   <node pkg="robogpt_bringup" type="bringup_art.py" name="Welcome_msg" output="screen">    
   </node>
     
-  <include file="$(find owl_bringup)/launch/bringup.launch" if="$(arg use_sim)" >
+  <include file="$(find sim_bringup)/launch/sim_bringup.launch" if="$(arg use_sim)" >
     <arg name="gripper" value="$(arg gripper)"/>
     <arg name="world" value="$(arg world)"/>
     <arg name="camera" value="$(arg camera)"/>
     <arg name="sim" value="$(arg sim)"/>
     <arg name="time" value="$(arg time)"/>
+    <arg name="robot_name" value="$(arg robot_name)"/>
   </include>
 
   <!-- Running real hardware till use_sim is false -->

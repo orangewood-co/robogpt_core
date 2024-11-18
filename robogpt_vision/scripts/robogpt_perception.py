@@ -62,12 +62,14 @@ class object_detection_implementation:
         rospy.loginfo(f"Name of the camera running:: {self.cam_name}")
         self.vision_sim = rospy.get_param("vision_sim", default="off")
         if self.vision_sim == "off":
-            self.topic_suffix = "image_rect_raw"
+            self.topic_suffix = "aligned_depth_to_color"
         if self.vision_sim == "on":
-            self.topic_suffix = "image_raw"
+            self.topic_suffix = "depth"
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber(f"/{self.cam_name}/color/image_raw", Image, self.color_callback)
-        self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/aligned_depth_to_color/image_raw", Image, self.depth_callback)
+        # self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/aligned_depth_to_color/image_raw", Image, self.depth_callback)
+        self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/{self.topic_suffix}/image_raw", Image, self.depth_callback)
+        rospy.logerr
         self.detect_pub = rospy.Publisher(f"/{self.cam_name}_frame",Image,queue_size=10)
         self.color_frame = None
         self.depth_frame = None
