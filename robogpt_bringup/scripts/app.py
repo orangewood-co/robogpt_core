@@ -222,6 +222,14 @@ class MainApp(QWidget):
         self.start_button.released.connect(lambda: self.set_button_color(self.start_button, "#333333"))  # Original
         button_layout.addWidget(self.start_button)
 
+        # Add to the button layout for the Stop button
+        self.stop_button = QPushButton("Stop")
+        self.stop_button.clicked.connect(self.stop_robogpt)
+        self.stop_button.pressed.connect(lambda: self.set_button_color(self.stop_button, "#FF4500"))  # Red
+        self.stop_button.released.connect(lambda: self.set_button_color(self.stop_button, "#333333"))  # Original
+        button_layout.addWidget(self.stop_button)
+
+
         # Main layout
         main_layout = QVBoxLayout()
         main_layout.addLayout(top_layout)  # Add logos and headline
@@ -316,6 +324,20 @@ class MainApp(QWidget):
                 processes = [bringup_process]
                 close_with_delay(processes, 5)
                 print("Processes terminated")
+
+    # Add the stop_robogpt method to the MainApp class
+    def stop_robogpt(self):
+        print("Stop button pressed. Terminating RoboGPT processes...")
+        try:
+            # Terminate all running processes
+            if hasattr(self, 'bringup_process') and self.bringup_process:
+                self.bringup_process.terminate()
+                self.bringup_process.wait()  # Ensure the process is fully terminated
+                print("RoboGPT processes stopped successfully.")
+            else:
+                print("No RoboGPT process found to stop.")
+        except Exception as e:
+            print(f"Error stopping RoboGPT: {e}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
