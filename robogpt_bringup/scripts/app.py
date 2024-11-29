@@ -6,6 +6,7 @@ import getpass
 import subprocess
 import rospkg,rospy
 from PySide6.QtWidgets import QApplication,QLineEdit, QWidget, QVBoxLayout, QLabel, QGraphicsOpacityEffect, QComboBox, QPushButton, QHBoxLayout, QGridLayout
+from Pyside6.QtWidgets import QSpacerItem, QSizePolicy
 from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation
 
@@ -227,6 +228,7 @@ class MainApp(QWidget):
         self.stop_button.clicked.connect(self.stop_robogpt)
         self.stop_button.pressed.connect(lambda: self.set_button_color(self.stop_button, "#FF0000"))  # Change color on press
         self.stop_button.released.connect(lambda: self.set_button_color(self.stop_button, "#333333"))  # Reset color
+        button_layout.addStretch(1) 
         button_layout.addWidget(self.stop_button)
 
         # Main layout
