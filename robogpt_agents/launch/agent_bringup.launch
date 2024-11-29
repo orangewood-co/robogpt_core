@@ -8,7 +8,7 @@
   <param name="/use_case" value="$(arg use_case)" />
 
 
-  <!-- Run a node from a package -->
+  <!-- Run  a node from a package -->
   <node 
       pkg="robogpt_agents" 
       type="prompt.py" 

@@ -16,9 +16,9 @@ from tf.transformations import euler_matrix,euler_from_matrix
 from robogpt_vision.srv import GetWorldContext, GetWorldContextResponse
 
 
-inst_matrix = np.array([[909.134765625,  0, 654.532836914062 ],
-                        [  0,908.667419433594, 372.789794921875],
-                        [  0, 0, 1       ]])
+inst_matrix = np.array([[607.379638671875, 0.0, 323.45916748046875],
+                        [  0.0, 607.0968627929688, 245.50621032714844],
+                        [  0, 0, 1.0]])
                         
 ##############################################################################
 
@@ -73,7 +73,7 @@ class ximg2xbase_implementation():
         rospy.init_node('get_world_context_service')
         service = rospy.Service('get_world_context', GetWorldContext, self._run)
         rospy.loginfo("Service 'get_world_context' is ready")
-        self.robot_name = rospy.get_param("/robot_name",default="sim")
+        self.robot_name = rospy.get_param("/robot_model",default="sim")
     
     def get_package_path(self, package_name):
         # Create an instance of the rospkg.RosPack class
@@ -100,7 +100,7 @@ class ximg2xbase_implementation():
         with open(file_name, 'r') as f:
             return json.load(f)
         
-    def get_home_pose(self):
+    def get_orientation_assumption(self):
         """
         Get the home pose of the robot for the specified robot IP from JSON.
 
@@ -109,10 +109,9 @@ class ximg2xbase_implementation():
         """
         try:
             robogpt_vision_path = self.get_package_path('robogpt_vision')
-            robot_home_file_path = poses_path
-            robot_dict = json.loads(open(robot_home_file_path).read())
+            robot_dict = json.loads(open(poses_path).read())
             robot_dict = robot_dict[self.robot_name]
-            robot_pose = robot_dict["home"] # Extract home pose from the JSON
+            robot_pose = robot_dict["orient"] # Extract home pose from the JSON
             return robot_pose
         except Exception as e:
             self.return_direct = True
@@ -313,6 +312,7 @@ class ximg2xbase_implementation():
             list or None: A list of converted coordinates in the robot base frame, or None if an error occurs.
         """
         try:
+            rospy.loginfo(f"Current robot in use {self.robot_name}")
             object_name = req.object_name
             parent_frame = req.parent_frame
             camera_name = req.camera_name
@@ -320,15 +320,11 @@ class ximg2xbase_implementation():
             Ximg = self.get_ximg(object_name,camera_name)
             Xbase = self.Ximg2Xbase(Ximg, parent_frame,camera_name)
             T_cam_base = np.round(np.array(self.get_T_cam_base(parent_frame,camera_name))[:3,:3])
-            offset = T_cam_base @ np.array([-0.05, 0.0, -0.04])
-            Xbase += offset[:3]
-            home_pose = self.get_home_pose()
-            orientation = home_pose[3:]
-
-            tcp_offset_z = 0.17 # Height of gripper spring
-            tcp_offset_y = 0.15
-            Xbase[1] = Xbase[1] + tcp_offset_y
-            
+            # offset = T_cam_base @ np.array([-0.05, 0.0, -0.04])
+            # Xbase += offset[:3]
+            orientation_assumption = self.get_orientation_assumption()
+            orientation = orientation_assumption[3:]
+            Xbase[2] = Xbase[2] + 0.12
             Xbase = [Xbase[0], Xbase[1], Xbase[2], orientation[0], orientation[1], orientation[2]] 
             return GetWorldContextResponse(Xbase=Xbase)
         

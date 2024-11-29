@@ -1,12 +1,16 @@
-
 <launch>
     <!-- Define an argument 'type' with default value 'stereo' -->
     <arg name="type" default="stereo"/>  <!-- options : stereo or rgb -->
 
-    <!-- Launch stereo camera setup node only if 'type' is 'stereo' -->
-    <node pkg="robogpt_vision" type="set_realsense_sources.py" name="stereo_camera_setup" output="screen" if="$(eval arg('type') == 'stereo')" />
+    <!-- Define an argument 'Camera Company' and making it a param -->
+    <arg name="comp_name" default="intel"/> <!-- Options : intel, orbec, or zed2i -->
+    <param name="comp_name" value="$(arg comp_name)"/>
 
-    <!-- Launch RGB camera setup node only if 'type' is 'rgb' -->
-    <node pkg="robogpt_vision" type="set_rgb_cam_sources.py" name="rgb_camera_setup" output="screen" if="$(eval arg('type') == 'rgb')" />
+    <!-- Launch stereo camera setup node only if 'type' is 'stereo' and 'comp_name' is 'intel' -->
+    <node pkg="robogpt_vision" type="set_realsense_sources.py" name="stereo_camera_setup" output="screen"
+          if="$(eval arg('type') == 'stereo' and arg('comp_name') == 'intel')" />
 
+    <!-- Launch RGB camera setup node only if 'type' is 'rgb' and 'comp_name' is 'intel' -->
+    <node pkg="robogpt_vision" type="set_rgb_cam_sources.py" name="rgb_camera_setup" output="screen"
+          if="$(eval arg('type') == 'rgb' and arg('comp_name') == 'intel')" />
 </launch>

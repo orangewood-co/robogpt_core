@@ -16,7 +16,7 @@ CLOUD_SERVER = "https://janatics.video.api.orangewood.co"
 
 
 class WebcamStreamer:
-    def __init__(self, type, camera_id, endpoint, serial, broker='localhost', port=1883, target_fps=30, quality=70,
+    def __init__(self, type, camera_id, endpoint, target_fps=30, quality=70,
                  resize_factor=1.0, buffer_size=2):
 
         rospy.init_node("Web_App_Feed_Node")
@@ -31,7 +31,6 @@ class WebcamStreamer:
         self.resize_factor = resize_factor
         self.target_fps = target_fps
         self.frame_time = 1 / target_fps
-        self.serial = serial
         self.bridge = CvBridge()
 
         # Setting the ros parameters 
@@ -185,7 +184,7 @@ if __name__ == "__main__":
     monitor1 = PerformanceMonitor()
 
 
-    streamer = WebcamStreamer("detection", 4, "upload1", serial, broker, port, TARGET_FPS, QUALITY, RESIZE_FACTOR, BUFFER_SIZE)
+    streamer = WebcamStreamer("detection", 4, "upload1", TARGET_FPS, QUALITY, RESIZE_FACTOR, BUFFER_SIZE)
     streamer.start()
 
     try:

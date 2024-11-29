@@ -37,10 +37,10 @@ class object_detection_implementation:
     specified algorithms, and extracts object features.
 
     Attributes:
-        serial (str): The serial number of the robot's camera.
+        cam_name (str): Name of the camera connected.
         color_frame (numpy.ndarray): The last received color frame from the robot's camera.
         depth_frame (numpy.ndarray): The last received depth frame from the robot's camera.
-        zero_shot (ZeroShotDetection): An object for zero-shot object detection.
+        yolov8 (YoloV8Detection): An object for yolov8 based object detection.
         color_detection (ColorDetection): An object for color-based object detection.
 
     Methods:
@@ -62,12 +62,14 @@ class object_detection_implementation:
         rospy.loginfo(f"Name of the camera running:: {self.cam_name}")
         self.vision_sim = rospy.get_param("vision_sim", default="off")
         if self.vision_sim == "off":
-            self.topic_suffix = "image_rect_raw"
+            self.topic_suffix = "aligned_depth_to_color"
         if self.vision_sim == "on":
-            self.topic_suffix = "image_raw"
+            self.topic_suffix = "depth"
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber(f"/{self.cam_name}/color/image_raw", Image, self.color_callback)
-        self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/depth/{self.topic_suffix}", Image, self.depth_callback)
+        # self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/aligned_depth_to_color/image_raw", Image, self.depth_callback)
+        self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/{self.topic_suffix}/image_raw", Image, self.depth_callback)
+        rospy.logerr
         self.detect_pub = rospy.Publisher(f"/{self.cam_name}_frame",Image,queue_size=10)
         self.color_frame = None
         self.depth_frame = None
@@ -88,13 +90,14 @@ class object_detection_implementation:
         try:
             # Convert the ROS Image message to OpenCV format
             # Convert the ROS Image message to a CV image
-            depth_image = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")
-            
+            # depth_image = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")
+            self.depth_frame = self.bridge.imgmsg_to_cv2(data, desired_encoding="16UC1")
+            # self.depth_frame = self.depth_frame.tobytes()
             # Normalize the depth image to fall between 0 and 255
-            depth_image = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
+            # depth_image = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
 
-            # Convert the depth image to an 8-bit image (from a 32-bit float image)
-            self.depth_frame = np.uint8(depth_image)
+            # # Convert the depth image to an 8-bit image (from a 32-bit float image)
+            # self.depth_frame = np.uint8(depth_image)
         except CvBridgeError as e:
             print(e)
 

@@ -66,29 +66,31 @@ if __name__ == '__main__':
             cam_name = rospy.get_param("camera_"+str(i), default="camera")
             serial_number = rospy.get_param("serial_no_"+str(i), default="")
             vision_sim = rospy.get_param("vision_sim", default="off")
-
-
+            camera_type = rospy.get_param("comp_name",default="intel")
+            
             # Define the arguments for each launch file
-            args_cams = [f'camera:={cam_name}', f'serial_no:={serial_number}']
+            args_cams = [f'camera:={cam_name}', f'serial_no:={serial_number}','align_depth:=true']
             args_cam_name =[f'camera_name:={cam_name}']
-            # Launch first file
-            if check_realsense_cameras():
-                process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
-                process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
 
-                # Wait for all processes to complete
-                process_camera_startup.wait()
-                process_init_detection.wait()
-
-
-            if not check_realsense_cameras():
-                rospy.logerr("No Cameras Detected. Please check the connected cameras if connected or switch to Simulation option")
-                if vision_sim == "on":
+            if vision_sim == "on":
                     rospy.loginfo("Starting Detection Module in Simulation")
                     process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',['camera_name:=camera'],5)
                     process_init_detection.wait()
-                
-                if vision_sim == "off":
+
+            if vision_sim == "off":
+                # Launch first file
+                if check_realsense_cameras():
+
+                    process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
+                    
+                    process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
+
+                    # Wait for all processes to complete
+                    process_camera_startup.wait()
+                    process_init_detection.wait()
+
+                if not check_realsense_cameras():
+                    rospy.logerr("No Cameras Detected. Please check the connected cameras if connected or switch to Simulation option")
                     rospy.logerr("No Hardware connected and Simulation option is off")
                     rospy.logerr("Exiting Vision Stack")
             

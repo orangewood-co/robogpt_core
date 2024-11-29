@@ -88,6 +88,8 @@ sudo ./backend_setup.sh
 **While running backend setup you need to setup the pusher key. Use the default pusher key present in `keys.txt` for using production Robogpt webapp**
 
 #### 2.2 Installation and setup of frontend for Running Robogpt-Webapp on local host
+**Note: This Step is Only valid if you want to run Webapp on local host. Not Mandatory** 
+
 Run `frontend.sh` file to clone and setup the robogpt-webapp in your local machine
 ```
 sudo chmod +x frontend_setup/frontend_setup.sh frontend_setup/pusher_key_update.py  # Making these two files executables
@@ -100,6 +102,7 @@ python3 frontend_setup/pusher_key_update.py  # Enter your pusher credentials her
 
 #### 3. Install pip depdencies
 ```
+cd ~/orangewood_ws/src/robogpt_v3/robogpt_bringup/setup
 pip3 install -r requirements.txt
 ```
 
@@ -152,4 +155,4 @@ roslaunch hardware_bringup bringup.launch type:=moveit driver:=robotiq
 
 ## 2) Setting Up in docker 
 
-### *TO-DO*
+Use this [Docker Setup](https://bitbucket.org/owl-dev/docker_robogpt/src/34e8ca2cdf3425d3e9a5a0adfc980ad7a34eb7ef/?at=feature%2Frobogpt-v3-lentin) Readme for this setup. 
