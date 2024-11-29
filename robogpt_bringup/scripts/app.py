@@ -6,13 +6,12 @@ import getpass
 import subprocess
 import rospkg,rospy
 from PySide6.QtWidgets import QApplication,QLineEdit, QWidget, QVBoxLayout, QLabel, QGraphicsOpacityEffect, QComboBox, QPushButton, QHBoxLayout, QGridLayout
-from PySide6.QtGui import QPixmap, QFont
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation
+from PySide6.QtGui import QPixmap, QFont, QDesktopServices
+from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QUrl
 
 rospack = rospkg.RosPack()
 vision_path = rospack.get_path('robogpt_vision')
 agent_path = rospack.get_path('robogpt_agents') 
-
 sys.path.append(vision_path)
 
 # Define base_dir for getting the exact path of skills/applications
@@ -315,9 +314,9 @@ class MainApp(QWidget):
             print(f"Here is the List of Arguments: {args}")
 
             bringup_process = launch_with_delay('robogpt_bringup bringup.launch',args=args, delay=5)
-            url_process = urllib.urlopen('http://example.com')
+            url = QUrl("https://robogpt.orangewood.co/")
+            QDesktopServices.openUrl(url)
             bringup_process.wait()  
-            url_process.wait()
 
         except KeyboardInterrupt:
                 # Terminate all processes if the script is interrupted

@@ -102,12 +102,5 @@ minimalmodbus
 
 # For moveit driver
 toppra
-<<<<<<< HEAD
-elirobots 
-transforms3d 
-pytest 
-rosdepc
-=======
 pyside6
 
->>>>>>> janatics

@@ -105,6 +105,11 @@ python3 frontend_setup/pusher_key_update.py  # Enter your pusher credentials her
 cd ~/orangewood_ws/src/robogpt_v3/robogpt_bringup/setup
 pip3 install -r requirements.txt
 ```
+#### 4. Install Robogpt Application
+```
+cd ~/orangewood_ws/src/robogpt_v3/robogpt_bringup/setup
+sudo ./install_desktop_icon.sh
+```
 
 ## Launching Robogpt on local machine
 
