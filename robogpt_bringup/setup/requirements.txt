@@ -102,3 +102,5 @@ minimalmodbus
 
 # For moveit driver
 toppra
+pyside6
+

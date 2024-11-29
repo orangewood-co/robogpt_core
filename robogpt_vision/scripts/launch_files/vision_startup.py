@@ -81,8 +81,7 @@ if __name__ == '__main__':
                 # Launch first file
                 if check_realsense_cameras():
 
-                    if camera_type == "intel":
-                        process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
+                    process_camera_startup = launch_with_delay('realsense2_camera rs_camera.launch ', args_cams, 5)
                     
                     process_init_detection = launch_with_delay('robogpt_vision detection_bringup.launch',args_cam_name,5)
 
