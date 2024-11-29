@@ -6,7 +6,7 @@ import getpass
 import subprocess
 import rospkg,rospy
 from PySide6.QtWidgets import QApplication,QLineEdit, QWidget, QVBoxLayout, QLabel, QGraphicsOpacityEffect, QComboBox, QPushButton, QHBoxLayout, QGridLayout
-from Pyside6.QtWidgets import QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import QSpacerItem, QSizePolicy
 from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation
 
@@ -223,13 +223,15 @@ class MainApp(QWidget):
         self.start_button.released.connect(lambda: self.set_button_color(self.start_button, "#333333"))  # Original
         button_layout.addWidget(self.start_button)
 
-        # Create Stop Button
-        self.stop_button = QPushButton("Stop")
+        # Add "Stop" button on the top right
+        self.stop_button = QPushButton("Stop", self)
         self.stop_button.clicked.connect(self.stop_robogpt)
-        self.stop_button.pressed.connect(lambda: self.set_button_color(self.stop_button, "#FF0000"))  # Change color on press
-        self.stop_button.released.connect(lambda: self.set_button_color(self.stop_button, "#333333"))  # Reset color
-        button_layout.addStretch(1) 
-        button_layout.addWidget(self.stop_button)
+        self.stop_button.setFixedSize(120, 50)
+        self.stop_button.move(self.width() - self.stop_button.width() - 20, 20)  # Adjust position as needed
+        self.stop_button.raise_()  # Ensure it's on top
+        self.stop_button.pressed.connect(lambda: self.set_button_color(self.stop_button, "#007BFF"))  # Change color on press
+        self.stop_button.released.connect(lambda: self.set_button_color(self.stop_button, "#FF0000"))  # Reset color
+        self.stop_button.setStyleSheet("background-color: #FF0000;")  # Default red
 
         # Main layout
         main_layout = QVBoxLayout()
