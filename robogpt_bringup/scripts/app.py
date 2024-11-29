@@ -6,12 +6,13 @@ import getpass
 import subprocess
 import rospkg,rospy
 from PySide6.QtWidgets import QApplication,QLineEdit, QWidget, QVBoxLayout, QLabel, QGraphicsOpacityEffect, QComboBox, QPushButton, QHBoxLayout, QGridLayout
-from PySide6.QtGui import QPixmap, QFont, QDesktopServices
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QUrl
+from PySide6.QtGui import QPixmap, QFont
+from PySide6.QtCore import Qt, QTimer, QPropertyAnimation
 
 rospack = rospkg.RosPack()
 vision_path = rospack.get_path('robogpt_vision')
 agent_path = rospack.get_path('robogpt_agents') 
+
 sys.path.append(vision_path)
 
 # Define base_dir for getting the exact path of skills/applications
@@ -221,13 +222,12 @@ class MainApp(QWidget):
         self.start_button.released.connect(lambda: self.set_button_color(self.start_button, "#333333"))  # Original
         button_layout.addWidget(self.start_button)
 
-        # Add to the button layout for the Stop button
+        # Create Stop Button
         self.stop_button = QPushButton("Stop")
         self.stop_button.clicked.connect(self.stop_robogpt)
-        self.stop_button.pressed.connect(lambda: self.set_button_color(self.stop_button, "#FF4500"))  # Red
-        self.stop_button.released.connect(lambda: self.set_button_color(self.stop_button, "#333333"))  # Original
+        self.stop_button.pressed.connect(lambda: self.set_button_color(self.stop_button, "#FF0000"))  # Change color on press
+        self.stop_button.released.connect(lambda: self.set_button_color(self.stop_button, "#333333"))  # Reset color
         button_layout.addWidget(self.stop_button)
-
 
         # Main layout
         main_layout = QVBoxLayout()
@@ -314,9 +314,9 @@ class MainApp(QWidget):
             print(f"Here is the List of Arguments: {args}")
 
             bringup_process = launch_with_delay('robogpt_bringup bringup.launch',args=args, delay=5)
-            url = QUrl("https://robogpt.orangewood.co/")
-            QDesktopServices.openUrl(url)
+            url_process = urllib.urlopen('http://example.com')
             bringup_process.wait()  
+            url_process.wait()
 
         except KeyboardInterrupt:
                 # Terminate all processes if the script is interrupted
@@ -324,19 +324,13 @@ class MainApp(QWidget):
                 close_with_delay(processes, 5)
                 print("Processes terminated")
 
-    # Add the stop_robogpt method to the MainApp class
     def stop_robogpt(self):
-        print("Stop button pressed. Terminating RoboGPT processes...")
-        try:
-            # Terminate all running processes
-            if hasattr(self, 'bringup_process') and self.bringup_process:
-                self.bringup_process.terminate()
-                self.bringup_process.wait()  # Ensure the process is fully terminated
-                print("RoboGPT processes stopped successfully.")
-            else:
-                print("No RoboGPT process found to stop.")
-        except Exception as e:
-            print(f"Error stopping RoboGPT: {e}")
+        print("Stopping RoboGPT...")
+        # Logic to terminate processes goes here
+        if hasattr(self, 'bringup_process'):
+            self.bringup_process.terminate()
+            self.bringup_process.wait()
+            print("RoboGPT stopped.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
