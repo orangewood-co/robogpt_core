@@ -317,14 +317,14 @@ class MainApp(QWidget):
             args = [f'robot_name:={self.robot_name}',f'use_case:={self.use_case}',f'type:={self.type}',f'driver:={self.driver}',f'use_sim:={self.use_sim}',f'sim_vision:={self.sim_vision}',f'robot_ip:={self.robot_ip}']
             print(f"Here is the List of Arguments: {args}")
 
-            bringup_process = launch_with_delay('robogpt_bringup bringup.launch',args=args, delay=5)
+            self.bringup_process = launch_with_delay('robogpt_bringup bringup.launch',args=args, delay=5)
             url_process = urllib.urlopen('http://example.com')
-            bringup_process.wait()  
+            self.bringup_process.wait()  
             url_process.wait()
 
         except KeyboardInterrupt:
                 # Terminate all processes if the script is interrupted
-                processes = [bringup_process]
+                processes = [self.bringup_process]
                 close_with_delay(processes, 5)
                 print("Processes terminated")
 
@@ -332,6 +332,7 @@ class MainApp(QWidget):
         print("Stopping RoboGPT...")
         # Logic to terminate processes goes here
         if hasattr(self, 'bringup_process'):
+            print("Started...")
             self.bringup_process.terminate()
             self.bringup_process.wait()
             print("RoboGPT stopped.")
