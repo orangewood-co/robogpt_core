@@ -140,14 +140,14 @@ class MainApp(QWidget):
         top_layout.addLayout(image_layout)  # Add image layout first (left and right)
 
         # Create the QLineEdit for Robot IP
-        robot_ip_input = QLineEdit(self)
-        robot_ip_input.setFont(font)
+        self.robot_ip_input = QLineEdit(self)
+        self.robot_ip_input.setFont(font)
 
         # Set placeholder text with CSS for low opacity
-        robot_ip_input.setPlaceholderText("Enter Robot IP...")
+        self.robot_ip_input.setPlaceholderText("Enter Robot IP...")
 
         # Apply CSS to the placeholder text for low opacity
-        robot_ip_input.setStyleSheet("""
+        self.robot_ip_input.setStyleSheet("""
             QLineEdit {
                 color: white;
                 margin-bottom: 20px
@@ -157,11 +157,11 @@ class MainApp(QWidget):
             }
         """)
         # Connect the textChanged signal to a method that updates the robot_ip variable
-        robot_ip_input.textChanged.connect(self.update_robot_ip)
+        self.robot_ip_input.textChanged.connect(self.update_robot_ip)
 
         # Create a layout for Robot IP
         robot_ip_layout = QVBoxLayout()
-        robot_ip_layout.addWidget(robot_ip_input)
+        robot_ip_layout.addWidget(self.robot_ip_input)
         robot_ip_layout.setSpacing(1)
         # Grid layout to organize dropdowns
         grid_layout = QGridLayout()
