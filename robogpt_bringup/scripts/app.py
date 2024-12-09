@@ -306,7 +306,7 @@ class MainApp(QWidget):
             print(f"Here is the List of Arguments: {args}")
 
             bringup_process = launch_with_delay('robogpt_bringup bringup.launch',args=args, delay=5)
-            url = QUrl("https://robogpt.orangewood.co/")
+            url = QUrl("https://robogpt.orangewood.co/chat")
             QDesktopServices.openUrl(url)
             bringup_process.wait()  
 

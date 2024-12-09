@@ -2,10 +2,11 @@
   <!-- Define an argument with a default value -->
   <arg name="robot_name" default="sim"/>
   <arg name="use_case"   default="base"/>
-
+  <arg name="setup" default="janatics"/>
   <!-- Use the argument for a parameter -->
   <param name="/robot_model" value="$(arg robot_name)" />
   <param name="/use_case" value="$(arg use_case)" />
+  <param name="setup" value="$(arg setup)"/>
 
 
   <!-- Run  a node from a package -->
