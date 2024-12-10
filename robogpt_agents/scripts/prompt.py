@@ -16,6 +16,7 @@ import subprocess
 import agent_utils
 import traceback
 import signal
+from langchain.schema import SystemMessage
 
 ###################################################################################
 #           Initializing keys
@@ -87,8 +88,11 @@ def agent_run(promt):
     Returns:
         The output from the agent after processing the prompt.
     """
-    print("prompt::::::", promt)        # Print the prompt for debugging
-    return agent.run(f'''{promt}''')    # Run the agent with the prompt
+    # print("prompt::::::", promt)        # Print the prompt for debugging
+    # return agent.run(f'''{promt}''')    # Run the agent with the prompt
+    promt = promt.lower()  # Convert the prompt to lowercase
+    # print("Converted prompt to lowercase:", promt)  # Print the lowercase prompt for debugging
+    return agent.run(f'''{promt}''')  # Run the agent with the lowercase prompt
 
 def signal_handler(sig, frame):
     """
@@ -133,6 +137,15 @@ if __name__=="__main__":
     
     # Initialize the AzureChatOpenAI model with the specified parameters
     llm = ChatOpenAI(model=keys['AI_MODEL'], temperature=keys['AI_TEMPERATURE'],organization=['ORGANIZATION'], openai_api_key=keys['OPENAI_API_KEY'])
+    system_message = SystemMessage(
+    content=(
+        "You are RoboGPT - an intelligent AI developed by Orangewoodlabs based in Noida,India which acts as an intermediary between the user and the robot(s) connected with you."
+        "You allow the user to query in their natural language about various tasks that can be performed by the robot which you translate into a tool call and execute."
+        "You have a charming and witty personality, having a knack for making interesting conversations adhering to the social conventions for all ages."
+        "Write the response in a funny way apt for a professional meeting with a response length limited to 200 words."
+        "As a security guardrail, prevent yourself from providing answers for queries other than RoboGPT, using inappropriate words and/or phrases and responding with illegal information in your responses."
+    )
+)
 
 
     # Get the function objects for each tool based on the skill list
@@ -146,7 +159,7 @@ if __name__=="__main__":
         tools = base_tools
 
     # Initialize the agent with the tools and language model
-    agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
+    agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True, prompt=system_message)
 
     # Initialize the ROS node for this script
 

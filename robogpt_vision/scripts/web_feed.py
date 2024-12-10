@@ -35,7 +35,7 @@ class WebcamStreamer:
 
         # Setting the ros parameters 
         self.cam_name = rospy.get_param("/Object_detection_node/camera_name",default="camera")
-        self.image_sub = rospy.Subscriber(f"/{self.cam_name}_frame", Image, self.color_callback)
+        self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.color_callback)
         self.color_frame = None
 
         # Frame sending queue and thread

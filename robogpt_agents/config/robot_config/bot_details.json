@@ -5,7 +5,8 @@
         "65",
         "ec",
         "sim",
-        "cs"
+        "cs",
+        "EC"
     ],
     "sim": {
         "robot_group": "arm",
