@@ -1,23 +1,22 @@
 {
     "apps": {
-            "base":[
-                    "robot_connection",
-                    "control_gripper",
-                    "hand_teach",
-                    "move_translate",
-                    "move_to_pose",
-                    "move_to_joint",
-                    "get_zone_pose",
-                    "move_in_trajactory",
-                    "save_pose",
-                    "check_pose"
-                    ]
-            ,
-            "pick_and_place":[
-                "pick_object",
-                "place_object",
-                "clean_table",
-                "industry_test"
-            ]
-        }
+        "base": [
+            "robot_connection",
+            "control_gripper",
+            "hand_teach",
+            "move_translate",
+            "move_to_pose",
+            "move_to_joint",
+            "get_zone_pose",
+            "move_in_trajactory",
+            "save_pose",
+            "check_pose"
+        ],
+        "pick_and_place": [
+            "pick_object",
+            "place_object",
+            "clean_table",
+            "industry_test"
+        ]
+    }
 }
