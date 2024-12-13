@@ -48,7 +48,9 @@ sys.path.append(base_dir)  # Add base directory to system path
 
 # Paths to tool configuration and robot configuration files
 skill_path = os.path.join(agent_base_path, "config/tools_config/app_list.json")
-
+# Load robot poses from JSON file
+robot_pose_file_path = os.path.join(agent_base_path, "config/robot_config/robot_pose.json")
+robot_poses = agent_utils.load_robot_poses(robot_pose_file_path)
 ###################################################################################
 #     Loading the Application 
 ###################################################################################
@@ -82,18 +84,27 @@ except Exception as e:
 def agent_run(promt):
     """
     Executes the agent with the provided prompt.
-
-    Args:
-        promt (str): The prompt to be processed by the agent.
-
-    Returns:
-        The output from the agent after processing the prompt.
     """
-    # print("prompt::::::", promt)        # Print the prompt for debugging
-    # return agent.run(f'''{promt}''')    # Run the agent with the prompt
-    promt = promt.lower()  # Convert the prompt to lowercase
-    # print("Converted prompt to lowercase:", promt)  # Print the lowercase prompt for debugging
-    return agent.run(f'''{promt}''')  # Run the agent with the lowercase prompt
+    promt = promt.lower()  # Convert prompt to lowercase
+
+    # Check for "move to" or "move robot to"
+    if "move to" in promt:
+        pose_name = promt.split("move to ")[-1].strip()  # Extract pose name
+        
+        # Check if pose exists in robot_poses
+        if not any(pose_name in robot_poses[model] for model in robot_poses):
+            agent_utils.send_msg(pusher_client, f"The required pose '{pose_name}' is not saved or not found.")
+            return "Pose not found."  # Return or handle as needed
+
+    elif "move robot to" in promt:
+        pose_name = promt.split("move robot to ")[-1].strip()  # Extract pose name
+        
+        # Check if pose exists in robot_poses
+        if not any(pose_name in robot_poses[model] for model in robot_poses):
+            agent_utils.send_msg(pusher_client, f"The required pose '{pose_name}' is not saved or not found.")
+            return "Pose not found."  # Return or handle as needed
+
+    return agent.run(f'''{promt}''')  # Run the agent with the prompt
 
 def signal_handler(sig, frame):
     """

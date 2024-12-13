@@ -7,6 +7,7 @@ import dotenv
 import rospkg
 import requests
 import subprocess
+import pusher
 
 rospack = rospkg.RosPack()
 base_agent = rospack.get_path('robogpt_agents')
@@ -25,14 +26,27 @@ def load_yaml_env_variables(yaml_file):
     
     return env_vars
 
-def send_msg(pusher_client,message):
+def load_robot_poses(file_path):
+    """
+    Load robot poses from a JSON file.
+    
+    Args:
+        file_path (str): The path to the robot poses JSON file.
+    
+    Returns:
+        dict: A dictionary containing robot poses.
+    """
+    with open(file_path, 'r') as f:
+        return json.load(f)
+
+def send_msg(pusher_client, message):
     """
     Sends a message to a specified Pusher channel.
 
     Args:
+        pusher_client: The Pusher client instance.
         message (str): The message to send.
     """
-    # Trigger the message event on the Pusher channel
     pusher_client.trigger('private-chat', 'evt::test', {'message': message})
 
 def load_env_variables(env_file):

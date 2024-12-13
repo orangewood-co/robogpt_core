@@ -16,7 +16,8 @@
             "pick_object",
             "place_object",
             "clean_table",
-            "industry_test"
+            "industry_test",
+            "wave_at_roscon"
         ]
     }
 }
