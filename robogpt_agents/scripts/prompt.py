@@ -38,8 +38,7 @@ KEEP_RUNNING = True
 ###################################################################################
 rospack = rospkg.RosPack()
 agent_base_path = rospack.get_path('robogpt_agents')
-setup = rospy.get_param("setup",default="janatics")
-robogpt_env_path = os.path.join(agent_base_path,"config",f".{setup}_env")
+robogpt_env_path = os.path.join(agent_base_path,"config",".janatics_env")
 keys = agent_utils.load_env_variables(robogpt_env_path)
 
 # Define base_dir for getting the exact path of skills/applications

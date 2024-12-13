@@ -78,6 +78,8 @@
   <include file="$(find robogpt_agents)/launch/agent_bringup.launch">
     <arg name="robot_name" value="$(arg robot_name)"/>
     <arg name="use_case"   value="$(arg use_case)"/>
+    <arg name="setup" value="$(arg setup)"/>
+
   </include> 
 
 </launch>
