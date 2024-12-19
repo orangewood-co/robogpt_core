@@ -140,7 +140,6 @@ if __name__=="__main__":
     )
 )
 
-
     # Get the function objects for each tool based on the skill list
     base_tools = [getattr(base_skills, name + "_implementation")() for name in base_list]
 
