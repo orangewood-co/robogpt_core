@@ -6,7 +6,7 @@
         "ec",
         "sim",
         "cs",
-        "tm"
+        "tm5"
     ],
     "sim": {
         "robot_group": "tmr_arm",
@@ -37,7 +37,7 @@
         "time_out": 30,
         "gripper_enable": false
     },
-    "tm100":{
+    "tm5":{
         "robot_group": "tmr_arm",
         "gripper_group": "gripper",
         "time_out": 30,

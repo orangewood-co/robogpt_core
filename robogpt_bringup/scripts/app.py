@@ -174,7 +174,7 @@ class MainApp(QWidget):
         self.dropdowns = []
         drop_labels = ["Robot Name", "Use Case", "Type", "Drivers", "Use Sim", "Sim Vision"]
         dropdown_options = [
-            ["ec63", "ec612", "owl68", "owl65", "ec66"],  
+            ["ec63", "ec612", "owl68", "owl65", "ec66","tm5"],  
             ["base", "pick_and_place", "archform", "drink_bot"],          
             ["description", "moveit"],               
             ["moveit", "robotiq", "both", "none"],        
