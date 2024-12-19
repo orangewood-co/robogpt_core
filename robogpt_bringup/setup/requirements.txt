@@ -15,7 +15,6 @@ levenshtein==0.23.0
 Pydantic==1.10.8  # Downgraded to support langchain and other dependencies
 openai==0.28.1 
 langchain==0.0.316  # Works with Pydantic 1.x
-spacy
 pusher
 langchainplus-sdk==0.0.20  # Works with Pydantic 1.x
 cv_bridge
@@ -103,4 +102,3 @@ minimalmodbus
 # For moveit driver
 toppra
 pyside6
-

@@ -1,22 +1,22 @@
 #!/usr/bin/python3
 
-import rospy
-import asyncio
-import importlib
 import json
+import rospy
+import pusher  # For real-time web socket communication
+import signal
 import rospkg
+import asyncio
 import getpass
+import traceback
+import importlib
+import subprocess
+import agent_utils
+import os,json,requests,sys
 import os, sys, json, importlib
+from langchain.schema import SystemMessage
 from langchain.prompts import PromptTemplate, chat, load_prompt
 from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.agents import initialize_agent, Tool, AgentType
-import os,json,requests,sys
-import pusher  # For real-time web socket communication
-import subprocess
-import agent_utils
-import traceback
-import signal
-from langchain.schema import SystemMessage
 
 ###################################################################################
 #           Initializing keys
@@ -86,23 +86,6 @@ def agent_run(promt):
     """
     promt = promt.lower()  # Convert prompt to lowercase
 
-    # Check for "move to" or "move robot to"
-    if "move to" in promt:
-        pose_name = promt.split("move to ")[-1].strip()  # Extract pose name
-        
-        # Check if pose exists in robot_poses
-        if not any(pose_name in robot_poses[model] for model in robot_poses):
-            agent_utils.send_msg(pusher_client, f"The required pose '{pose_name}' is not saved or not found.")
-            return "Pose not found."  # Return or handle as needed
-
-    elif "move robot to" in promt:
-        pose_name = promt.split("move robot to ")[-1].strip()  # Extract pose name
-        
-        # Check if pose exists in robot_poses
-        if not any(pose_name in robot_poses[model] for model in robot_poses):
-            agent_utils.send_msg(pusher_client, f"The required pose '{pose_name}' is not saved or not found.")
-            return "Pose not found."  # Return or handle as needed
-
     return agent.run(f'''{promt}''')  # Run the agent with the prompt
 
 def signal_handler(sig, frame):
@@ -125,7 +108,6 @@ async def connect():
         try:
             data, id= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
             output = agent_run(data)                                           # Run the agent with the retrieved prompt
-            print(output)                                                      # Print the output for debugging
             agent_utils.send_msg(pusher_client=pusher_client,message=output)   # Send the output message to the Pusher channel
 
         except Exception as e:
@@ -164,10 +146,7 @@ if __name__=="__main__":
 
     specific_tools = [getattr(specfic_skills, name + "_implementation")() for name in specific_skill_list]
 
-    if use_case != "base":
-        tools = base_tools + specific_tools   
-    elif use_case == "base":
-        tools = base_tools
+    tools = base_tools if use_case == "base" else base_tools + specific_tools
 
     # Initialize the agent with the tools and language model
     agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True, prompt=system_message)

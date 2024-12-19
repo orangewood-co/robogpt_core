@@ -6,23 +6,43 @@
         "ec",
         "sim",
         "cs",
-        "EC"
+        "tm"
     ],
     "sim": {
-        "robot_group": "arm",
-        "gripper_group": "gripper"
+        "robot_group": "tmr_arm",
+        "gripper_group": "gripper",
+        "time_out": 30,
+        "gripper_enable": false
     },
-    
     "owl65": {
-        "robot_ip": "10.42.0.53"
+        "robot_ip": "10.42.0.53",
+        "robot_group": "arm",
+        "gripper_group": "gripper",
+        "time_out": 30,
+        "gripper_enable": false
 
     },
     "owl68": {
-        "robot_ip": "10.42.0.53"
+        "robot_ip": "10.42.0.53",
+        "robot_group": "arm",
+        "gripper_group": "gripper",
+        "time_out": 30,
+        "gripper_enable": false
 
     },
     "ec63": {
-        "robot_ip":"192.168.1.200"
+        "robot_ip":"192.168.1.200",
+        "robot_group": "arm",
+        "gripper_group": "gripper",
+        "time_out": 30,
+        "gripper_enable": false
+    },
+    "tm100":{
+        "robot_group": "tmr_arm",
+        "gripper_group": "gripper",
+        "time_out": 30,
+        "gripper_enable": false
     }
+
 
 }
