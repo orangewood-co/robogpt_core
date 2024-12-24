@@ -31,11 +31,10 @@ class YoloV8Detection:
     def __init__(self):
         rospack = rospkg.RosPack()
         package_path = rospack.get_path('robogpt_vision')
-        self.weights_path = os.path.join(package_path,"scripts/object_detection/weights/marker.pt")
+        self.weights_path = os.path.join(package_path,"scripts/object_detection/weights/veggies.pt")
         rospy.loginfo("Initiating YoloV8 Model")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = YOLO(self.weights_path).to(self.device)
-
 
     def parse_json_file(self,file_name):
         """

@@ -10,14 +10,13 @@
             "get_zone_pose",
             "move_in_trajactory",
             "save_pose",
-            "check_pose"
+            "check_pose",
+            "industry_test"
         ],
         "pick_and_place": [
             "pick_object",
             "place_object",
-            "clean_table",
-            "industry_test",
-            "wave_at_roscon"
+            "clean_table"
         ]
     }
 }

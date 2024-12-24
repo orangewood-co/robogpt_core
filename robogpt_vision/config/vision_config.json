@@ -6,11 +6,9 @@
         "True"
     ],
     "objects_to_detect": [
-        "soap",
-        "bucket",
-        "candy",
-        "gel",
-        "duster"
+        "onion",
+        "tomato",
+        "potato"
     ],
     "new_weights": "",
     "old_data_set": "auto_train_data/train_v20240703194007"

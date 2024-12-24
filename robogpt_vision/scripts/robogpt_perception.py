@@ -69,7 +69,6 @@ class object_detection_implementation:
         self.image_sub = rospy.Subscriber(f"/{self.cam_name}/color/image_raw", Image, self.color_callback)
         # self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/aligned_depth_to_color/image_raw", Image, self.depth_callback)
         self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/{self.topic_suffix}/image_raw", Image, self.depth_callback)
-        rospy.logerr
         self.detect_pub = rospy.Publisher(f"/{self.cam_name}_frame",Image,queue_size=10)
         self.color_frame = None
         self.depth_frame = None
@@ -89,15 +88,8 @@ class object_detection_implementation:
     def depth_callback(self, data):
         try:
             # Convert the ROS Image message to OpenCV format
-            # Convert the ROS Image message to a CV image
-            # depth_image = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")
             self.depth_frame = self.bridge.imgmsg_to_cv2(data, desired_encoding="16UC1")
-            # self.depth_frame = self.depth_frame.tobytes()
-            # Normalize the depth image to fall between 0 and 255
-            # depth_image = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
 
-            # # Convert the depth image to an 8-bit image (from a 32-bit float image)
-            # self.depth_frame = np.uint8(depth_image)
         except CvBridgeError as e:
             print(e)
 
@@ -185,34 +177,6 @@ class object_detection_implementation:
             
         return detection_result
     
-
-    def merge_and_append_detections(self, data, new_data):
-        old_objects = {}  # map "object" to detection keys like "detection_1", "detection_0", etc.
-
-        # Create old_objects dictionary
-        for key, value in data["10.42.0.53"].items():
-            detected_object = value.get("detected_object")
-            if detected_object is not None:
-                old_objects[detected_object] = key
-
-        # Find the last big detection key
-        last_big_detection_key = max((k for k in data["10.42.0.53"].keys() if k.startswith("detection_")), key=lambda x: int(x.split("_")[1]))
-
-        # Iterate through new_data and append new detections to data
-        for new_key, new_value in new_data["10.42.0.53"].items():
-            detected_object = new_value.get("detected_object")
-            if detected_object is not None:
-                if detected_object in old_objects:
-                    # Update the existing detection in data
-                    old_key = old_objects[detected_object]
-                    data["10.42.0.53"][old_key].update(new_value)
-                else:
-                    # Append new detection with incremented key
-                    new_detection_key = "detection_" + str(int(last_big_detection_key.split("_")[1]) + 1)
-                    data["10.42.0.53"][new_detection_key] = new_value
-                    last_big_detection_key = new_detection_key
-
-        return data
     
     def signal_handler(sig, frame):
         rospy.loginfo("Keyboard interrupt received. Exiting...")

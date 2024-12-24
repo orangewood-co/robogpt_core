@@ -63,16 +63,13 @@
 
   </include>
 
-  <!-- Run the vision stack -->
-  <include file="$(find robogpt_vision)/launch/vision_bringup.launch">
-    <arg name="sim_vision" value="$(arg sim_vision)"/> 
-    <arg name="comp_name" value="$(arg cam_name)"/> 
-
-  </include>
+  <node pkg="robogpt_vision" type="live_feed.py" name="start_feed">    
+    </node>
 
   <!-- Sending the video feed to web pub sub -->
   <node pkg="robogpt_vision" type="web_feed.py" name="web_feed" >    
   </node>
+  
 
   <!-- Running the agents to control bot -->
   <include file="$(find robogpt_agents)/launch/agent_bringup.launch">
@@ -82,5 +79,14 @@
     <arg name="setup" value="$(arg setup)"/>
 
   </include> 
+
+  <!-- Run the vision stack -->
+  <include file="$(find timed_roslaunch)/launch/timed_roslaunch.launch">
+      <arg name="time" value="$(arg time)" />
+      <arg name="pkg" value="robogpt_vision" />
+      <arg name="file" value="vision_bringup.launch" />
+      <arg name="value" value="sim_vision:=$(arg sim_vision) comp_name:=$(arg cam_name)"/>
+      <arg name="node_name" value="timed_vision" /> <!-- This is optional argument -->
+  </include>
 
 </launch>
