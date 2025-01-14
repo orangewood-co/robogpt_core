@@ -1,13 +1,14 @@
 import os
+import ast
 import sys
 import json
 import yaml
 import uuid
 import dotenv
 import rospkg
+import pusher
 import requests
 import subprocess
-import pusher
 
 rospack = rospkg.RosPack()
 base_agent = rospack.get_path('robogpt_agents')
@@ -159,4 +160,52 @@ def set_speed_factor():
         with open(robogpt_config, 'w') as t:
             json.dump(robot_data, t)  # Save updated configuration
         print("Speed set to", float(speed_req.text))  # Confirm speed setting
+
+
+def extract_base_class_names(file_path, suffixes=None):
+    """
+    Extracts base class names from a Python file by removing specified suffixes.
+
+    Args:
+        file_path (str): Path to the Python file.
+        suffixes (list, optional): List of suffixes to remove from class names.
+
+    Returns:
+        list: A sorted list of unique base class names.
+    """
+    if suffixes is None:
+        suffixes = ['_implementation']
+
+    with open(file_path, 'r') as file:
+        file_content = file.read()
+
+    # Parse the Python file into an AST
+    try:
+        tree = ast.parse(file_content)
+    except SyntaxError as e:
+        print(f"Syntax error while parsing {file_path}: {e}")
+        return []
+
+    base_class_names = set()
+
+    # Iterate over all nodes in the AST
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            class_name = node.name
+            base_name = None
+            # Check for each suffix and remove if present
+            for suffix in suffixes:
+                if class_name.endswith(suffix):
+                    potential_base = class_name[:-len(suffix)]
+                    if potential_base:  # Ensure base name is not empty
+                        base_name = potential_base
+                        break
+            if base_name:
+                base_class_names.add(base_name)
+            else:
+                # Optionally, handle classes without the specified suffixes
+                # For example, you can choose to ignore them or include their full names
+                pass  # Currently, we're ignoring classes without the suffixes
+
+    return sorted(base_class_names)  # Sorted for consistency
 

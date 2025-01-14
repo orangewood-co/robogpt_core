@@ -102,3 +102,7 @@ minimalmodbus
 # For moveit driver
 toppra
 pyside6
+
+# simulation sdk
+owl_robot_sdk
+plyfile

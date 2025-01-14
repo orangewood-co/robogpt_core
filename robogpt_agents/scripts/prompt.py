@@ -61,17 +61,12 @@ try:
     # Log the start of the function
     rospy.loginfo("Starting")
 
-    # Load the JSON file containing tool configurations
-    with open(skill_path) as f:
-        data = json.load(f)
-
-    # Retrieve the function names for tools from the loaded data
-    base_list = data["apps"].get('base', [])              
-    specific_skill_list = data["apps"].get(use_case, [])
+    base_list = agent_utils.extract_base_class_names(os.path.join(base_dir,"robogpt_apps/scripts/base/skills.py"))
+    specific_skill_list = agent_utils.extract_base_class_names(os.path.join(base_dir,f"robogpt_apps/scripts/{use_case}/skills.py"))      
 
     # Dynamically import the applications module
-    specfic_skills = importlib.import_module(module_name)
     base_skills = importlib.import_module(base_model)
+    specific_skills = importlib.import_module(module_name)
     print("Load successful")                    # Confirm successful loading
 
 except Exception as e:
@@ -142,9 +137,7 @@ if __name__=="__main__":
 
     # Get the function objects for each tool based on the skill list
     base_tools = [getattr(base_skills, name + "_implementation")() for name in base_list]
-
-    specific_tools = [getattr(specfic_skills, name + "_implementation")() for name in specific_skill_list]
-
+    specific_tools = [getattr(specific_skills, name + "_implementation")() for name in specific_skill_list]
     tools = base_tools if use_case == "base" else base_tools + specific_tools
 
     # Initialize the agent with the tools and language model

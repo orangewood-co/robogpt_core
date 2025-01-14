@@ -16,10 +16,10 @@ from tf.transformations import euler_matrix,euler_from_matrix
 from robogpt_vision.srv import GetWorldContext, GetWorldContextResponse
 
 
-inst_matrix = np.array([[607.379638671875, 0.0, 323.45916748046875],
-                        [  0.0, 607.0968627929688, 245.50621032714844],
+inst_matrix = np.array([[909.3656005859375, 0.0, 658.6245727539062],
+                        [  0.0, 908.4342651367188, 359.7082824707031],
                         [  0, 0, 1.0]])
-                        
+
 ##############################################################################
 
 global depth
@@ -320,11 +320,9 @@ class ximg2xbase_implementation():
             Ximg = self.get_ximg(object_name,camera_name)
             Xbase = self.Ximg2Xbase(Ximg, parent_frame,camera_name)
             T_cam_base = np.round(np.array(self.get_T_cam_base(parent_frame,camera_name))[:3,:3])
-            # offset = T_cam_base @ np.array([-0.05, 0.0, -0.04])
-            # Xbase += offset[:3]
             orientation_assumption = self.get_orientation_assumption()
             orientation = orientation_assumption[3:]
-            Xbase[2] = Xbase[2] + 0.12
+            Xbase[2] = Xbase[2] + 0.01
             Xbase = [Xbase[0], Xbase[1], Xbase[2], orientation[0], orientation[1], orientation[2]] 
             return GetWorldContextResponse(Xbase=Xbase)
         

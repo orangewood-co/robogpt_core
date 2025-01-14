@@ -10,13 +10,26 @@
             "get_zone_pose",
             "move_in_trajactory",
             "save_pose",
-            "check_pose",
+            "save_joint_angles",
             "industry_test"
         ],
         "pick_and_place": [
             "pick_object",
             "place_object",
-            "clean_table"
+            "clean_table",
+            "check_pose"
+        ],
+        "gazebo_skills": [
+            "pick_object",
+            "spawn_model",
+            "check_model",
+            "check_model_pose",
+            "scan_area",
+            "get_current_sim_models"
+        ],
+        "sf_demo": [
+            "scan_object",
+            "auto_train"
         ]
     }
 }

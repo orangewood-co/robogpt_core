@@ -9,11 +9,10 @@
   <arg name="cam_name" default="intel"/>              <!-- Options : intel, orbec, or zed2i -->
   <arg name="robot_ip" default="192.168.1.201"/>      <!-- Option: Ip address of the robot  -->
   <arg name="setup" default="janatics"/>
-  <param name="setup" value="$(arg setup)"/>
-
+  
   <!-- Simulation args -->
   <arg name="gripper" default="robotiq2f85" />        <!-- Option: vacuum, pneumatic,robotiq2f85 -->
-  <arg name="world" default="empty" />                <!-- Option: empty, stand,table -->
+  <arg name="world" default="table" />                <!-- Option: empty, stand,table -->
   <arg name="camera" default="on" />                  <!-- Option: empty, stand,table -->
   <arg name="sim" default="on" />                     <!-- Option: simulation ON or OFF -->
 
@@ -31,6 +30,11 @@
   <arg name="camera_model" default="d435"/>           <!-- Option: Camera model d435 or d414 -->
   <arg name="gripper_model" default="robotiq"/>       <!-- Option: robotiq, pneumatic, spring loaded, dummy -->
   <arg name="cams" default="one"/>                    <!-- Option: number of cams need to use: one or two -->
+
+
+  <!-- Setting up parameters -->
+  <param name="setup" value="$(arg setup)"/>
+  <param name="use_sim" value="$(arg use_sim)"/>
 
 
   <!-- RUNNING LAUNCH FILES -->
@@ -63,8 +67,8 @@
 
   </include>
 
-  <node pkg="robogpt_vision" type="live_feed.py" name="start_feed">    
-    </node>
+  <!-- <node pkg="robogpt_vision" type="web_feed.py" name="start_feed">    
+    </node> -->
 
   <!-- Sending the video feed to web pub sub -->
   <node pkg="robogpt_vision" type="web_feed.py" name="web_feed" >    
@@ -79,6 +83,7 @@
     <arg name="setup" value="$(arg setup)"/>
 
   </include> 
+
 
   <!-- Run the vision stack -->
   <include file="$(find timed_roslaunch)/launch/timed_roslaunch.launch">
