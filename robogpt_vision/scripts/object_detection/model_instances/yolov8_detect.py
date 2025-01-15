@@ -31,6 +31,7 @@ class YoloV8Detection:
     def __init__(self):
         rospack = rospkg.RosPack()
         package_path = rospack.get_path('robogpt_vision')
+        self.robogpt_config = os.path.join(package_path,"config/vision_config.json")
         self.weights_path = os.path.join(package_path,"scripts/object_detection/weights/veggies.pt")
         rospy.loginfo("Initiating YoloV8 Model")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -94,6 +95,7 @@ class YoloV8Detection:
         
         # Return the value for the key 'new_weights'
         return data.get('new_weights')
+    
     def clear_weights(self,file_path):
 
         with open(file_path, 'r') as file:
@@ -107,10 +109,12 @@ class YoloV8Detection:
                 json.dump(data, file, indent=4)
 
     def detect(self, image):
-        # weights_path = self.read_new_weights(robogpt_config)
-        # if weights_path != "":
-        #     self.model = YOLO(weights_path).to(self.device)
-        #     self.clear_weights(robogpt_config)
+
+        weights_path = self.read_new_weights(self.robogpt_config)
+        if weights_path != "":
+            self.model = YOLO(weights_path).to(self.device)
+            rospy.loginfo(f"New Weights detected. Using Weights from {weights_path}")
+            self.clear_weights(self.robogpt_config)
         
         results = self.model(image)
         detections = []

@@ -175,10 +175,10 @@ class MainApp(QWidget):
         drop_labels = ["Robot Name", "Use Case", "Type", "Drivers", "Use Sim", "Sim Vision"]
         dropdown_options = [
             ["ec63", "ec612", "owl68", "owl65", "ec66","tm5"],  
-            ["base", "pick_and_place", "archform", "gazebo_skills"],          
+            ["base", "pick_and_place", "archform", "gazebo_skills","sf_demo"],          
             ["description", "moveit"],               
             ["moveit", "robotiq", "both", "none"],        
-            ["false", "true"],  
+            ["true", "false"],  
             ["off","on"], 
         ]
 
@@ -248,7 +248,7 @@ class MainApp(QWidget):
         self.use_case = "base"
         self.type = "description"
         self.driver = "none"
-        self.use_sim = "true"
+        self.use_sim = "false"
         self.sim_vision = "off"
         self.robot_ip = "192.168.1.200"
 

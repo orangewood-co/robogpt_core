@@ -15,5 +15,7 @@
 
 
     <node pkg="robogpt_vision" type="get_world_context.py" name="get_world_context_service" output="screen" />
+    <node pkg="auto_train_ros" type="auto_train_server.py" name="auto_train_server" output="screen" />
+
     
 </launch>
