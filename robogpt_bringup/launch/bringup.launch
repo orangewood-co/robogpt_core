@@ -93,5 +93,3 @@
       <arg name="value" value="sim_vision:=$(arg sim_vision) comp_name:=$(arg cam_name)"/>
       <arg name="node_name" value="timed_vision" /> <!-- This is optional argument -->
   </include>
-
-</launch>

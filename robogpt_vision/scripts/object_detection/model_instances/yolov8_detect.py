@@ -111,6 +111,7 @@ class YoloV8Detection:
     def detect(self, image):
 
         weights_path = self.read_new_weights(self.robogpt_config)
+        # rospy.logwarn(weights_path)
         if weights_path != "":
             self.model = YOLO(weights_path).to(self.device)
             rospy.loginfo(f"New Weights detected. Using Weights from {weights_path}")
