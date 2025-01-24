@@ -7,6 +7,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   message_generation
+  actionlib_msgs
+  actionlib
 )
 
 add_service_files(
@@ -14,14 +16,20 @@ add_service_files(
   GetWorldContext.srv  
 )
 
+add_action_files(
+  FILES
+  RecordCamera.action
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs
-  geometry_msgs  
+  geometry_msgs
+  actionlib_msgs
 )
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs roscpp rospy message_runtime
+  CATKIN_DEPENDS geometry_msgs roscpp rospy message_runtime actionlib_msgs std_msgs actionlib
 )
 
 include_directories(
