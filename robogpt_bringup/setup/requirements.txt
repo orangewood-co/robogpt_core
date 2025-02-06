@@ -29,7 +29,7 @@ python-socketio==5.8.0
 pytz==2023.3
 pyfiglet
 pytz-deprecation-shim==0.1.0.post0
-pyyaml==6.0.1
+
 referencing==0.30.2
 regex==2023.8.8
 requests==2.31.0
@@ -53,7 +53,6 @@ sympy==1.12
 tabulate==0.9.0
 tenacity==8.2.2
 pyqt5
-ultralytics
 numpy==1.24.4
 setuptools==60.2.0
 zipp==3.1.0
@@ -69,32 +68,16 @@ azure-storage-file-datalake
 azure-storage-queue
 
 # # auto_train dependencies
-# asttokens==2.0.5
-# backcall==0.2.0
-# decorator==5.1.1
-# exceptiongroup==1.2.0
-# executing==0.8.3
-# jedi==0.18.1
-# parso==0.8.3
-# pexpect==4.8.0
-# pickleshare==0.7.5
-# pip==24.0
-# prompt-toolkit==3.0.43
-# ptyprocess==0.7.0
-# pure_eval==0.2.2
-# pygments==2.15.1
-# six==1.16.0
-# stack_data==0.2.0
-# traitlets==5.7.1
-# wcwidth==0.2.5
-# wheel==0.43.0
-# Pillow==10.3.0
-# split-folders==0.5.1
-# PyYAML==6.0.1
-# transformers==4.41.1
-# imgaug==0.4.0
-# albumentations==1.3.0  # Downgraded to support Pydantic 1.x
-# scikit-learn==1.3.2
+albumentations==1.4.7
+imgaug==0.4.0
+numpy==1.24.4
+opencv_python_headless==4.10.0.84
+Pillow
+PyYAML==6.0.2
+split-folders
+transformers==4.46.3
+ultralytics==8.3.37
+
 pyside6
 # Requirment for robotiq gripper
 minimalmodbus

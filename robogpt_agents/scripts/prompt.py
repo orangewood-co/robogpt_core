@@ -101,7 +101,9 @@ async def connect():
     try:
         # Attempt to retrieve and process a prompt
         try:
-            data, id= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
+            data, id, url= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
+            if url is not None:
+                agent_utils.download_file(url, output_dir=f"/home/{getpass.getuser()}/robogpt-assets")
             output = agent_run(data)                                           # Run the agent with the retrieved prompt
             agent_utils.send_msg(pusher_client=pusher_client,message=output)   # Send the output message to the Pusher channel
 
@@ -124,7 +126,7 @@ if __name__=="__main__":
         app_id=keys['PUSHER_APP_ID'], key=keys['NEXT_PUBLIC_PUSHER_KEY'], secret=keys['PUSHER_SECRET'], cluster=keys['NEXT_PUBLIC_PUSHER_CLUSTER'])
     
     # Initialize the AzureChatOpenAI model with the specified parameters
-    llm = ChatOpenAI(model=keys['AI_MODEL'], temperature=keys['AI_TEMPERATURE'],organization=['ORGANIZATION'], openai_api_key=keys['OPENAI_API_KEY'])
+    llm = ChatOpenAI(model=keys['AI_MODEL'], temperature=keys['AI_TEMPERATURE'],organization=keys['ORGANIZATION'], openai_api_key=keys['OPENAI_API_KEY'])
     system_message = SystemMessage(
     content=(
         "You are RoboGPT - an intelligent AI developed by Orangewoodlabs based in Noida,India which acts as an intermediary between the user and the robot(s) connected with you."

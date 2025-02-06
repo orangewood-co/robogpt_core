@@ -29,7 +29,8 @@
         ],
         "sf_demo": [
             "scan_object",
-            "auto_train"
+            "auto_train",
+            "update"
         ]
     }
 }

@@ -1,14 +1,18 @@
 import os
+import re
 import ast
 import sys
 import json
 import yaml
 import uuid
 import dotenv
+import rospy
+import getpass
 import rospkg
 import pusher
 import requests
 import subprocess
+from urllib.parse import urlsplit, unquote
 
 rospack = rospkg.RosPack()
 base_agent = rospack.get_path('robogpt_agents')
@@ -73,30 +77,50 @@ def load_env_variables(env_file):
 def local_prompt(app_id):
     """
     Subscribes to a Pusher channel and retrieves messages containing prompts.
+    Extracts the prompt text, an ID (if present), and any URL found in the prompt text.
 
     Returns:
-        tuple: A tuple containing the prompt text and its associated ID.
+        tuple: A tuple containing the prompt text, its associated ID (empty string if not found),
+               and the URL (or None if not present).
     """
     output_file = os.path.join(base_agent, "config/tools_config/output.json")
     command = f"pusher channels apps subscribe --app-id {app_id} --channel private-chat"
 
     # Execute the command to subscribe to the Pusher channel and process the output
     process = subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
+
     with open(output_file, "w") as f:
         for line in process.stdout:
-            print(line)                                 # Print the output line for debugging
-            parts = line.split(":")                     # Split the line by colon
-            if len(parts) > 2:                          # Ensure there are enough parts to process
-                subparts = parts[2].split('"')          # Extract the prompt
-                prompt = subparts[1]                    # Get the prompt text
-                subid = parts[3].split('"')             # Extract the ID
-                id = subid[1]                           # Get the ID
-                print(prompt)                           # Print the prompt for debugging
-                
-                return prompt, id                       # Return the prompt and ID
-            
+            print("Raw line:", line)  # Debug: print the raw line
+
+            # Use a regex to extract the JSON portion from the line.
+            # This looks for the substring starting with 'message=' and then a { ... } block.
+            json_match = re.search(r'message=({.*})', line)
+            if not json_match:
+                continue  # if the JSON block isn't found, skip this line
+
+            json_str = json_match.group(1)
+            try:
+                data = json.loads(json_str)
+            except json.JSONDecodeError as e:
+                print("JSON decode error:", e)
+                continue
+
+            # Extract the prompt text. In your original message, the prompt is under the "message" key.
+            prompt = data.get("message", "")
+            # If there is an ID field in the JSON, extract it. Otherwise, default to an empty string.
+            id = data.get("id", "")
+
+            # Use a regex to search for a URL in the prompt text.
+            # This regex will match http:// or https:// followed by non-whitespace, non-quote characters.
+            url_match = re.search(r'https?://[^\s"]+', prompt)
+            url = url_match.group(0) if url_match else None
+
+            # Debug prints
+            print("Prompt:", prompt)
+            return prompt, id, url
 
 
 
@@ -209,3 +233,45 @@ def extract_base_class_names(file_path, suffixes=None):
 
     return sorted(base_class_names)  # Sorted for consistency
 
+def download_file(url, output_dir='~/'):
+    """
+    Downloads a file from the specified URL and saves it using the original file name,
+    stripping off any trailing hash that may have been appended to the file name.
+
+    Args:
+        url (str): The URL of the file to download.
+        output_dir (str, optional): The directory where the file will be saved. Defaults to the current directory.
+
+    Returns:
+        str: The path to the downloaded file, or None if an error occurred.
+    """
+    # Extract the filename from the URL.
+    parsed_url = urlsplit(url)
+    filename = os.path.basename(parsed_url.path)
+    # Decode URL-encoded characters (e.g., %20 becomes a space)
+    filename = unquote(filename)
+
+    # Use a regex substitution to remove the trailing hash if present.
+    # This pattern looks for an extension (dot followed by letters/digits)
+    # followed by at least 8 hexadecimal characters at the end of the filename.
+    filename = re.sub(r'(\.[A-Za-z0-9]+)[0-9a-f]{8,}$', r'\1', filename)
+
+    # Ensure the output directory exists.
+    os.makedirs(output_dir, exist_ok=True)
+    local_filepath = os.path.join(output_dir, filename)
+
+    try:
+        # Download the file with streaming enabled.
+        with requests.get(url, stream=True) as response:
+            response.raise_for_status()  # Raise an error for bad status codes.
+            with open(local_filepath, 'wb') as file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:  # Filter out keep-alive chunks.
+                        file.write(chunk)
+        print(f"File downloaded successfully: {local_filepath}")
+        rospy.set_param("/attachment_path",local_filepath)
+        
+    except requests.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"An error occurred: {err}")
