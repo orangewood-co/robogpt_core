@@ -95,6 +95,10 @@ def local_prompt(app_id):
         for line in process.stdout:
             print("Raw line:", line)  # Debug: print the raw line
 
+            # Filter: Only process messages with event 'chatbox'
+            if "event=chatbox" not in line:
+                continue
+
             # Use a regex to extract the JSON portion from the line.
             # This looks for the substring starting with 'message=' and then a { ... } block.
             json_match = re.search(r'message=({.*})', line)

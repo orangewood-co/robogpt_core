@@ -38,7 +38,7 @@ KEEP_RUNNING = True
 ###################################################################################
 rospack = rospkg.RosPack()
 agent_base_path = rospack.get_path('robogpt_agents')
-robogpt_env_path = os.path.join(agent_base_path,"config",".janatics_env")
+robogpt_env_path = os.path.join(agent_base_path,"config",".demo_env")
 keys = agent_utils.load_env_variables(robogpt_env_path)
 
 # Define base_dir for getting the exact path of skills/applications
@@ -75,7 +75,7 @@ except Exception as e:
 
 ###################################################################################
 
-def agent_run(promt):
+def arjun_run(promt):
     """
     Executes the agent with the provided prompt.
     """
@@ -104,7 +104,7 @@ async def connect():
             data, id, url= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
             if url is not None:
                 agent_utils.download_file(url, output_dir=f"/home/{getpass.getuser()}/robogpt-assets")
-            output = agent_run(data)                                           # Run the agent with the retrieved prompt
+            output = arjun_run(data)                                           # Run the agent with the retrieved prompt
             agent_utils.send_msg(pusher_client=pusher_client,message=output)   # Send the output message to the Pusher channel
 
         except Exception as e:

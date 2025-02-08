@@ -17,11 +17,10 @@ from scripts.agent_utils import load_env_variables, send_msg
 class Pick_N_Place_Tour():
     def __init__(self) -> None:
         # Initialize the ROS node first
-        rospy.init_node("rosnode_asli_wali")
         self.pass_bool = False
 
         # Load environment variables and initialize pusher client
-        self.robogpt_env_path = os.path.join(agent_base_path, "config", ".janatics_env")
+        self.robogpt_env_path = os.path.join(agent_base_path, "config", ".demo_env")
         self.keys = load_env_variables(self.robogpt_env_path)
         self.pusher_client = pusher.Pusher(
             app_id=self.keys['PUSHER_APP_ID'],
@@ -31,7 +30,7 @@ class Pick_N_Place_Tour():
         )
 
         # Create subscriber for boolean messages
-        self.boolean_subscriber = rospy.Subscriber("/boolean_topic", Bool, self.boolean_callback)
+        self.boolean_subscriber = rospy.Subscriber("/pass_topic", Bool, self.boolean_callback)
 
     def boolean_callback(self, msg: Bool):
         rospy.loginfo("Received boolean message: %s", msg.data)
@@ -80,9 +79,9 @@ class Pick_N_Place_Tour():
         while not self.pass_bool and not rospy.is_shutdown():
             rospy.sleep(0.1)
 
-    def start(self):
+    def script(self):
         # Send robot to home position
-        self.ai_formatted_msg("Let's first take the robot to the home position. Try prompting 'Move robot to home' command")
+        self.ai_formatted_msg("Let's get Started with this, First Move the robot to home pose. You can just say 'Move robot to home'")
         self.wait_for_confirmation("Waiting for confirmation (pass_bool == True) for home position...")
 
         # Instruct user for training a new object
@@ -110,4 +109,4 @@ class Pick_N_Place_Tour():
     
 if __name__ == "__main__":
     pnp = Pick_N_Place_Tour()
-    pnp.start()
+    pnp.script()
