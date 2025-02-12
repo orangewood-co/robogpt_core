@@ -65,7 +65,7 @@ if __name__ == '__main__':
             i = i + 1 
             cam_name = rospy.get_param("camera_"+str(i), default="camera")
             serial_number = rospy.get_param("serial_no_"+str(i), default="")
-            vision_sim = rospy.get_param("vision_sim", default="off")
+            vision_sim = rospy.get_param("vision_sim", default="on")
             camera_type = rospy.get_param("comp_name",default="intel")
             
             # Define the arguments for each launch file

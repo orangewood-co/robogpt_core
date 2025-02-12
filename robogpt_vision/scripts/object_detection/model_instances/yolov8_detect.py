@@ -13,7 +13,7 @@ import struct
 from ultralytics import YOLO
 from scipy.stats import trim_mean
 
-# robogpt_config = "config/owl/robogpt.json"
+
 
 class YoloV8Detection:
     ''' Implements a fintuned yoloV5 model on custom weights.

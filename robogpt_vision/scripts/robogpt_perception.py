@@ -69,10 +69,10 @@ class object_detection_implementation:
         self.image_sub = rospy.Subscriber(f"/{self.cam_name}/color/image_raw", Image, self.color_callback)
         # self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/aligned_depth_to_color/image_raw", Image, self.depth_callback)
         self.depth_sub = rospy.Subscriber(f"/{self.cam_name}/{self.topic_suffix}/image_raw", Image, self.depth_callback)
-        self.detect_pub = rospy.Publisher(f"/{self.cam_name}_frame",Image,queue_size=10)
+        self.detect_pub = rospy.Publisher(f"/web_feed",Image,queue_size=1)
         self.color_frame = None
         self.depth_frame = None
-
+        self.masking = False
         self.color_detection = ColorDetection()
         self.yolo_detection = YoloV8Detection()
         self.detection_buffer = DetectionBuffer()
@@ -263,8 +263,10 @@ class object_detection_implementation:
             detection_feed = self.bridge.cv2_to_imgmsg(color_frame_copy, "bgr8")
         
             # Publish the ROS Image message
-            self.detect_pub.publish(detection_feed)
-
+            self.masking = rospy.get_param("/masking",default=False)
+            if not self.masking:
+                self.detect_pub.publish(detection_feed)
+            
             elapsed_time = time.time() - start_time
             if not image_sent and elapsed_time > 20:
                 image_sent = True

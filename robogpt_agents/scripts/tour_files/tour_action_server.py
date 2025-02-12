@@ -3,7 +3,7 @@
 import rospy
 import actionlib
 from robogpt_agents.msg import TourAction, TourFeedback, TourResult
-from pick_n_place import Pick_N_Place_Tour
+from tours import *
 
 class TourActionServer:
     def __init__(self):
