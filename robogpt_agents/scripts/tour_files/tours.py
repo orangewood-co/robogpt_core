@@ -43,7 +43,7 @@ class Guide():
           self.keys = agu.load_env_variables(robogpt_env_path)
           self.model = self.keys['AI_MODEL']
           self.end = False
-          self.counter = 0
+          self.counter = 1
           self.pusher_client = pusher.Pusher(
                 app_id=self.keys['PUSHER_APP_ID'],
                 key=self.keys['NEXT_PUBLIC_PUSHER_KEY'],
@@ -125,14 +125,16 @@ class Guide():
         system_response = None
         print("Inside get_prompt_response function")
 
-        for line in process.stdout:
+        while prompt is None or system_response is None:
+            line = process.stdout.readline()
+            if not line:
+                continue  # If no line is read, continue waiting
+
             print("Raw line in server:", line)  # Debug: print the raw line
                 
-            # Use a regex to extract the JSON portion from the line.
-            # This looks for the substring starting with 'message=' and then a { ... } block.
             json_match = re.search(r'message=({.*})', line)
             if not json_match:
-                continue  # if the JSON block isn't found, skip this line
+                continue
 
             json_str = json_match.group(1)
             try:
@@ -141,13 +143,16 @@ class Guide():
                 print("JSON decode error:", e)
                 continue
             
-            if "event=chatbox" in line:
-                prompt = data.get("message", "")
-            if "event=evt::test" in line:
+            if "event=evt::test" in line and system_response is None:
                 system_response = data.get("message", "")
+            if "event=chatbox" in line and prompt is None:
+                prompt = data.get("message", "")
 
             print(f"INSIDE THE FUNCTION, GET_PROMPT_RESPONSE\nfunc_prompt: {prompt}\nfunc_sys_response: {system_response}")
-            return prompt, system_response
+
+        # Once both are obtained, return them
+        process.terminate()  # Stop the subprocess when done
+        return prompt, system_response
      
      
      def information_flow(self):
@@ -156,7 +161,7 @@ class Guide():
 
         app_id = self.keys['PUSHER_APP_ID']
 
-        while TOUR_RUNNING:
+        while self.counter < len(formatted_steps):
             prompt = None
             system_response = None
 
@@ -164,10 +169,23 @@ class Guide():
                 print("Inside second while loop")
                 prompt, system_response = self.get_prompt_response(app_id)
                 print(f"PROMPT: {prompt}\nSYSTEM RESPONSE: {system_response}")
+            
+            print(f"COUNTER: {self.counter}")
 
-    
-            # for i in formatted_steps:
-            #     step_response = self.steps(i, )
+            step_response = self.steps(formatted_steps[self.counter], system_response)
+            confirmation = self.step_tracker(formatted_steps[self.counter], step_response)
+            print(f"CONFIRMATION: {confirmation}")
+            if confirmation.strip().lower() == "yes":
+                agu.send_msg(pusher_client=self.pusher_client, message=formatted_steps[self.counter])
+                self.counter += 1
+            
+            while confirmation.strip().lower() == "no":
+                step_response = self.steps(formatted_steps[self.counter], prompt)
+                confirmation = self.step_tracker(formatted_steps[self.counter], step_response)
+                agu.send_msg(pusher_client=self.pusher_client, message=step_response)
+                if confirmation.strip().lower() == "yes":
+                    self.counter += 1
+                
 
      
 
@@ -205,9 +223,10 @@ send_msg :: user_qu
 #         print(f"STEPS RESPONSE: {user_qu}")
 #         confirmation = guide.step_tracker(i, user_qu)
 #         print(f"CONFIRMATION: {confirmation}")
-#         whiluser = input("USER: ")
+#         while confirmation.strip().lower() == "no":
+#              user = input("USER: ")
 #              user_qu = guide.steps(i, user)
 #              print(f"STEPS RESPONSE: {user_qu}")
 #              confirmation = guide.step_tracker(i, user_qu)
-#              print(f"CONFIRMATION: {confirmation}")e confirmation.strip().lower() == "no":
+#              print(f"CONFIRMATION: {confirmation}")
 #              
