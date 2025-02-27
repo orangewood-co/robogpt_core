@@ -12,7 +12,7 @@
   <param name="setup" value="$(arg setup)"/>
 
 
-  <!-- Run  a node from a package -->
+  <!-- Run  a node from a package   -->
   <node 
       pkg="robogpt_agents" 
       type="prompt.py" 
@@ -21,10 +21,11 @@
   </node>
 
     <!-- Run  a node from a package -->
-  <node 
+  <!-- <node 
       pkg="robogpt_agents" 
       type="tour_action_server.py" 
-      name="tour_server" >
-  </node>
+      name="tour_server" 
+      output="screen">
+  </node> -->
 
 </launch>

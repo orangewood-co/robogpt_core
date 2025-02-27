@@ -1,0 +1,4 @@
+Let's start the tour. Move the robot to home pose. You can just say 'Move robot to home'
+For robot motion, enable hand teach mode. Try the prompt 'enable hand teach mode'.
+Move the robot to the point you want to save, and use this test prompt: 'Save this pose as test'.
+You have the saved waypoint, now you can pass in 'Move to test pose' to go to the saved pose.
