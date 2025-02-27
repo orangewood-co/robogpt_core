@@ -43,7 +43,7 @@ class Guide():
           self.keys = agu.load_env_variables(robogpt_env_path)
           self.model = self.keys['AI_MODEL']
           self.end = False
-          self.counter = 1
+          self.counter = 0
           self.pusher_client = pusher.Pusher(
                 app_id=self.keys['PUSHER_APP_ID'],
                 key=self.keys['NEXT_PUBLIC_PUSHER_KEY'],
@@ -93,7 +93,15 @@ class Guide():
         response = openai.ChatCompletion.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": f"You are a helpful assistant, helping the user following the tour steps i.e. \n{self.user_steps}\n If there is any issue the user is facing, help them solve that and if there are no challenges, respond in a positive manner. This is the current step to refer to \n{current_step}"},
+                {"role": "system", "content": (
+                        "You are a helpful tour assistant, guiding the user through the following tour steps: \n"
+                        f"{self.user_steps}\n\n"
+                        "Your goal is to ensure the user progresses smoothly through the steps. If the user reports an issue:\n"
+                        "- First, confirm whether the issue is resolved.\n"
+                        "- If resolved, acknowledge it positively and encourage them to move forward.\n"
+                        "- If not resolved, provide a clear and actionable solution to help them proceed.\n\n"
+                        f"Current step: {current_step}"
+                    )},
                 {"role": "user", "content": prompt}
                 ]
             )
@@ -148,7 +156,7 @@ class Guide():
             if "event=chatbox" in line and prompt is None:
                 prompt = data.get("message", "")
 
-            print(f"INSIDE THE FUNCTION, GET_PROMPT_RESPONSE\nfunc_prompt: {prompt}\nfunc_sys_response: {system_response}")
+            # print(f"INSIDE THE FUNCTION, GET_PROMPT_RESPONSE\nfunc_prompt: {prompt}\nfunc_sys_response: {system_response}")
 
         # Once both are obtained, return them
         process.terminate()  # Stop the subprocess when done
@@ -166,25 +174,31 @@ class Guide():
             system_response = None
 
             while prompt is None and system_response is None:
-                print("Inside second while loop")
+                # print("Inside second while loop")
                 prompt, system_response = self.get_prompt_response(app_id)
                 print(f"PROMPT: {prompt}\nSYSTEM RESPONSE: {system_response}")
             
             print(f"COUNTER: {self.counter}")
+            print(f"CURRENT STEP: {formatted_steps[self.counter]}")
 
             step_response = self.steps(formatted_steps[self.counter], system_response)
+            print(f"STEP RESPONSE: {step_response}")
             confirmation = self.step_tracker(formatted_steps[self.counter], step_response)
             print(f"CONFIRMATION: {confirmation}")
             if confirmation.strip().lower() == "yes":
-                agu.send_msg(pusher_client=self.pusher_client, message=formatted_steps[self.counter])
+                if self.counter+1 < len(formatted_steps):
+                    agu.send_msg(pusher_client=self.pusher_client, message=formatted_steps[self.counter+1])
+                elif self.counter == len(formatted_steps)-1:
+                    agu.send_msg(pusher_client=self.pusher_client, message="Thank you for  joining the tour. Enjoy exploring RoboGPT!")
                 self.counter += 1
             
             while confirmation.strip().lower() == "no":
-                step_response = self.steps(formatted_steps[self.counter], prompt)
+                step_response = self.steps(formatted_steps[self.counter], system_response)
                 confirmation = self.step_tracker(formatted_steps[self.counter], step_response)
-                agu.send_msg(pusher_client=self.pusher_client, message=step_response)
-                if confirmation.strip().lower() == "yes":
-                    self.counter += 1
+                # agu.send_msg(pusher_client=self.pusher_client, message=step_response)
+                
+                # if confirmation.strip().lower() == "yes":
+                #     self.counter += 1
                 
 
      
