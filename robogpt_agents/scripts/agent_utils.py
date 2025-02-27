@@ -74,7 +74,7 @@ def load_env_variables(env_file):
     # Return the environment variables as a dictionary
     return env_vars
     
-def local_prompt(app_id):
+def pusher_listener(app_id):
     """
     Subscribes to a Pusher channel and retrieves messages containing prompts.
     Extracts the prompt text, an ID (if present), and any URL found in the prompt text.
@@ -83,7 +83,7 @@ def local_prompt(app_id):
         tuple: A tuple containing the prompt text, its associated ID (empty string if not found),
                and the URL (or None if not present).
     """
-    output_file = os.path.join(base_agent, "config/tools_config/output.json")
+    output_file = os.path.join(base_agent, "config/pusher_config/output.json")
     command = f"pusher channels apps subscribe --app-id {app_id} --channel private-chat"
 
     # Execute the command to subscribe to the Pusher channel and process the output

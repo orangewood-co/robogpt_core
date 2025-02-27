@@ -55,7 +55,7 @@ robot_poses = agent_utils.load_robot_poses(robot_pose_file_path)
 ###################################################################################
 use_case = rospy.get_param("/use_case",default="base")
 base_model = f'robogpt_apps.scripts.base.skills'
-module_name = f'robogpt_apps.scripts.{use_case}.skills'
+specific_model = f'robogpt_apps.scripts.{use_case}.skills'
 
 try:
     # Log the start of the function
@@ -66,7 +66,7 @@ try:
 
     # Dynamically import the applications module
     base_skills = importlib.import_module(base_model)
-    specific_skills = importlib.import_module(module_name)
+    specific_skills = importlib.import_module(specific_model)
     print("Load successful")                    # Confirm successful loading
 
 except Exception as e:
@@ -75,7 +75,7 @@ except Exception as e:
 
 ###################################################################################
 
-def arjun_run(promt):
+def agent_run(promt):
     """
     Executes the agent with the provided prompt.
     """
@@ -101,10 +101,10 @@ async def connect():
     try:
         # Attempt to retrieve and process a prompt
         try:
-            data, id, url= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
+            data, id, url= agent_utils.pusher_listener(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
             if url is not None:
                 agent_utils.download_file(url, output_dir=f"/home/{getpass.getuser()}/robogpt-assets")
-            output = arjun_run(data)                                           # Run the agent with the retrieved prompt
+            output = agent_run(data)                                           # Run the agent with the retrieved prompt
             agent_utils.send_msg(pusher_client=pusher_client,message=output)   # Send the output message to the Pusher channel
 
         except Exception as e:

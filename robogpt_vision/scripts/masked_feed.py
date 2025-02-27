@@ -21,9 +21,11 @@ class ObjectDetector:
         self.latest_frame = None  # Latest received frame from ROS
         self.reference_gray = None  # Placeholder for the reference background
         self.image_topic = image_topic
+
         # Subscribe to the ROS image topic
         self.image_sub = rospy.Subscriber(self.image_topic, Image, self.image_callback)
         self.image_pub = rospy.Publisher("/masked_feed",Image,queue_size=10)
+
         # Wait for the first image message to initialize the reference background
         try:
             rospy.loginfo("Waiting for the first image message to set the reference background...")
@@ -44,8 +46,8 @@ class ObjectDetector:
         rect_height = 250
 
         # Calculate top-left coordinates to center the boundary rectangle
-        rect_x = (self.image_width - rect_width) // 2   # (640 - 250)//2 = 195
-        rect_y = (self.image_height - rect_height) // 2  # (480 - 250)//2 = 115
+        rect_x = (self.image_width - rect_width) // 2       # (640 - 250)//2 = 195
+        rect_y = (self.image_height - rect_height) // 2     # (480 - 250)//2 = 115
 
         # Set the boundary_rect as a tuple: (x, y, width, height)
         self.boundary_rect = (rect_x, rect_y, rect_width, rect_height)

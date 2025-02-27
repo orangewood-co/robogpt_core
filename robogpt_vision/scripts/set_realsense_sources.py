@@ -13,6 +13,12 @@ from tkinter import simpledialog
 rospy.init_node("stereo_camera_setup", anonymous=True)
 
 def get_profiles():
+    """Retrieves the profiles of connected RealSense devices.
+
+    Returns:
+        list: A list of dictionaries containing device information such as
+        name, serial number, and stream formats.
+    """
     ctx = rs.context()
     devices = ctx.query_devices()
     devices_info = []
@@ -40,7 +46,6 @@ def get_profiles():
                     else:
                         depth_profiles.append((w, h, fps, fmt.value))
 
-
         devices_info.append({
             'name': name,
             'serial': serial,
@@ -52,15 +57,21 @@ def get_profiles():
     return devices_info
 
 
-# Function to read and modify a YAML file
-def modify_yaml_file(filename, camera_name, serial,i):
+def modify_yaml_file(filename, camera_name, serial, i):
+    """Reads and modifies a YAML file with camera information.
 
+    Args:
+        filename (str): The name of the YAML file to modify.
+        camera_name (str): The name of the camera.
+        serial (str): The serial number of the camera.
+        i (int): The index of the camera.
+    """
     rospack = rospkg.RosPack()
     package_path = rospack.get_path('robogpt_vision')   
     sys.path.append(package_path)
 
     # Construct the full path to the YAML file
-    yaml_file_path = os.path.join(package_path,"config/camera_params.yaml")
+    yaml_file_path = os.path.join(package_path, "config/camera_params.yaml")
 
     rospy.loginfo("Camera Info Saved.")
     
@@ -73,8 +84,8 @@ def modify_yaml_file(filename, camera_name, serial,i):
         data = yaml.safe_load(file)
 
     # Modify the specific key
-    data["camera_"+str(i)] = camera_name
-    data["serial_no_"+str(i)] = serial
+    data["camera_" + str(i)] = camera_name
+    data["serial_no_" + str(i)] = serial
     data["number_of_cams"] = i
 
     # Write the modified data back to the same file (or a new file)
@@ -83,6 +94,15 @@ def modify_yaml_file(filename, camera_name, serial,i):
 
 
 def get_user_input(title, prompt):
+    """Prompts the user for input using a dialog box.
+
+    Args:
+        title (str): The title of the dialog box.
+        prompt (str): The prompt message to display.
+
+    Returns:
+        str: The user's input.
+    """
     root = tk.Tk()
     root.withdraw()
     return simpledialog.askstring(title, prompt)
@@ -115,10 +135,10 @@ if __name__ == "__main__":
             depth_image = np.asanyarray(depth_frame.get_data())
 
             cv2.imshow('1', color_image) 
-            key = cv2.waitKey(1)  & 0xFF
+            key = cv2.waitKey(1) & 0xFF
             if key == ord("y"):
                 camera_name = get_user_input("Camera name", f"Enter a name for camera {name}-{serial}:")
-                modify_yaml_file('camera_params.yaml',camera_name,serial,i)
+                modify_yaml_file('camera_params.yaml', camera_name, serial, i)
                 break
             elif key == ord("n"):
                 cv2.destroyAllWindows()
