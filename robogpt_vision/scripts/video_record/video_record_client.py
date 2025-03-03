@@ -16,7 +16,7 @@ def record_camera_client(ros_topic, output_file, duration):
 
     rospy.loginfo(f"Sending goal: topic={ros_topic}, file={output_file}, duration={duration}")
     client.send_goal(goal)
-    client.wait_for_result()
+    # client.wait_for_result()
 
     result = client.get_result()
     if result.success:

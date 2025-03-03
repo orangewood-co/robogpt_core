@@ -21,12 +21,4 @@ while True:
             data = line
         print(data)
     logs.send_to_all(message = data)
-# with client:
-#     def on_message(event):
-#         print(event.data)
-#         # answer=test_skill.agent_run(event.data)
-#         # print(answer)  
-#     client.on("server-message", on_message)
-#     while True:
-#         pass
 
