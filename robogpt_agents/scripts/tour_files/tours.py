@@ -74,7 +74,7 @@ class Guide():
         response = openai.ChatCompletion.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": f"You are a helpful assistant, helping the user with the steps to follow. This is the RoboGPT tour and you are the tour guide. Keep the conversation interesting with a knack of wit and charm, adhering to the social conventions for all ages. Keep the response length limited and clear. Donot give these headsup on the dates of updated information. Please rephrase the following system message:\n\n {message}"}
+                {"role": "system", "content": f"You are a helpful assistant, helping the user with the steps to follow. This is the RoboGPT tour and you are the tour guide. Keep the conversation interesting with a knack of wit and charm, adhering to the social conventions for all ages. Keep the response length limited and clear. Donot give these headsup on the dates of updated information. The conversation is based on this context {self.user_steps} Please rephrase the following system message stating a clear message as per the context for ease of new user to understand and follow:\n\n {message}\n Make the message very clear and concise"}
                 ]
             )
         return response['choices'][0]['message']['content']

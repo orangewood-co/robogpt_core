@@ -1,11 +1,10 @@
-Let's start setting up the task. First, provide workpiece details like size, weight, and material. You can say like 'The workpiece is a white block, 10cm x 10cm, weighing 500g.'
-For visual recognition, enable auto-training by saying 'Train this white piece and name it workpiece.' 
+Let's start setting up the task. Define your workpiece details like size, color to enable auto-training by saying like 'Train this white piece and name it workpiece.'
+Move the robot using hand teach mode; you can simply ask me to 'Enable hand teach mode.' to define the different poses required.
 Define the home position by moving the robot to your preferred location and saying 'Save the current pose as home.'
-Next, set up waypoints for the task—pick, place, wait, and retract. We'll do that one by one. First, move the robot using hand teach mode; you can simply ask me to 'Enable hand teach mode.' 
-Move the robot to pick position and save it by saying 'Save this current pose as pick.'
-Move the robot to place position and save it by saying 'Save this current pose as place.'
-Move the robot to wait position and save it by saying 'Save this current pose as wait.'
+Next, set up waypoints for the task—pick, place, wait, and retract. We'll start by moving the robot to pick position and save it by saying 'Save this current pose as pick.' The robot will pick the object from here
+Move the robot to place position and save it by saying 'Save this current pose as place.' This is the place where our object will be placed. 
+Move the robot to wait position and save it by saying 'Save this current pose as wait.' Robot waits here in the meantime.
 Move the robot to retract position and save it by saying 'Save this current pose as retract.'
-Now, program gripper actions. Tell me where to open the gripper by saying 'Open gripper at pick' 
-And where to close the gripper by saying 'Close gripper at place.'
+Now, program gripper actions. Tell me where to open the gripper by saying 'Open gripper at pick'
+And where to close the gripper by saying 'Close gripper at place'.  
 Finally, name this skill as drilling and save by saying 'Save this skill as drilling' or simply ask me to run this newly learned skill!
