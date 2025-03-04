@@ -53,35 +53,54 @@ robot_poses = agent_utils.load_robot_poses(robot_pose_file_path)
 ###################################################################################
 #     Loading the Application 
 ###################################################################################
-use_case = rospy.get_param("/use_case",default="base")
-base_model = f'robogpt_apps.scripts.base.skills'
-module_name = f'robogpt_apps.scripts.{use_case}.skills'
+def tool_loader():
+    """
+    Loads and initializes the tools based on the current use case.
 
-try:
-    # Log the start of the function
-    rospy.loginfo("Starting")
+    Returns:
+        list: A list of tool instances to be used by the agent.
+    """
+    use_case = rospy.get_param("/use_case", default="base")
+    base_model = 'robogpt_apps.scripts.base.skills'
+    module_name = f'robogpt_apps.scripts.{use_case}.skills'
 
-    base_list = agent_utils.extract_base_class_names(os.path.join(base_dir,"robogpt_apps/scripts/base/skills.py"))
-    specific_skill_list = agent_utils.extract_base_class_names(os.path.join(base_dir,f"robogpt_apps/scripts/{use_case}/skills.py"))      
+    try:
+        # Log the start of the function
+        rospy.loginfo("Starting skill_loader")
 
-    # Dynamically import the applications module
-    base_skills = importlib.import_module(base_model)
-    specific_skills = importlib.import_module(module_name)
-    print("Load successful")                    # Confirm successful loading
+        base_list = agent_utils.extract_base_class_names(
+            os.path.join(base_dir, "robogpt_apps/scripts/base/skills.py")
+        )
+        specific_skill_list = agent_utils.extract_base_class_names(
+            os.path.join(base_dir, f"robogpt_apps/scripts/{use_case}/skills.py")
+        )
 
-except Exception as e:
-    # Log any exceptions that occur during the loading process
-    print(f"Could not load tools due to {e}")
+        # Dynamically import the applications modules
+        base_skills = importlib.import_module(base_model)
+        specific_skills = importlib.import_module(module_name)
+        print("Load successful")  # Confirm successful loading
+
+        # Get the function objects for each tool based on the skill list
+        base_tools = [getattr(base_skills, name + "_implementation")() for name in base_list]
+        specific_tools = [getattr(specific_skills, name + "_implementation")() for name in specific_skill_list]
+        tools = base_tools if use_case == "base" else base_tools + specific_tools
+
+        return tools
+    
+    except Exception as e:
+        # Log any exceptions that occur during the loading process
+        print(f"Could not load tools due to {e}")
+        return None
 
 ###################################################################################
 
-def arjun_run(promt):
+def arjun_run(function_calling_agent,prompt):
     """
     Executes the agent with the provided prompt.
     """
-    promt = promt.lower()  # Convert prompt to lowercase
+    prompt = prompt.lower()  # Convert prompt to lowercase
 
-    return agent.run(f'''{promt}''')  # Run the agent with the prompt
+    return function_calling_agent.run(f'''{prompt}''')  # Run the agent with the prompt
 
 def signal_handler(sig, frame):
     """
@@ -93,7 +112,7 @@ def signal_handler(sig, frame):
 
 
 # Rest of your setup and WebSocket connection code
-async def connect():
+async def connect(agent):
     """
     Establishes a connection to the WebPubSub service and processes incoming prompts.
     """
@@ -104,7 +123,7 @@ async def connect():
             data, id, url= agent_utils.local_prompt(app_id=keys['PUSHER_APP_ID'])   # Get prompt and ID from local source
             if url is not None:
                 agent_utils.download_file(url, output_dir=f"/home/{getpass.getuser()}/robogpt-assets")
-            output = arjun_run(data)                                           # Run the agent with the retrieved prompt
+            output = arjun_run(function_calling_agent,data)                                           # Run the agent with the retrieved prompt
             agent_utils.send_msg(pusher_client=pusher_client,message=output)   # Send the output message to the Pusher channel
 
         except Exception as e:
@@ -138,19 +157,29 @@ if __name__=="__main__":
 )
 
     # Get the function objects for each tool based on the skill list
-    base_tools = [getattr(base_skills, name + "_implementation")() for name in base_list]
-    specific_tools = [getattr(specific_skills, name + "_implementation")() for name in specific_skill_list]
-    tools = base_tools if use_case == "base" else base_tools + specific_tools
+    try:
+            tools = tool_loader()
+            if tools:
+                print("Skills loaded successfully.")
+            else:
+                rospy.logerr("Failed to load tools.")
+                sys.exit(1)
+    except Exception as e:
+            rospy.logerr(f"An unexpected error occurred while loading tools: {e}")
+            sys.exit(1)
 
     # Initialize the agent with the tools and language model
-    agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True, prompt=system_message)
-
-    # Initialize the ROS node for this script
+    function_calling_agent = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True, prompt=system_message)
 
     # Main loop to continuously connect and process prompts
     while KEEP_RUNNING:
         try:
-            asyncio.get_event_loop().run_until_complete(connect())  # Run the connection process
+            reload = rospy.get_param("/reload_tools",default=False)
+            if reload:
+                function_calling_agent = initialize_agent(tool_loader(), llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True, prompt=system_message)
+                rospy.loginfo("Agents Reloaded!!")
+                rospy.set_param("/reload_tools",False)
+            asyncio.get_event_loop().run_until_complete(connect(function_calling_agent))  # Run the connection process
         except Exception as e:
             traceback.print_exc()
             print("An error occurred:", e)
