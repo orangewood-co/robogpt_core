@@ -7,7 +7,6 @@ import subprocess
 import pusher
 import json
 import re
-import time
 
 # Get package path and add it to sys.path
 rospack = rospkg.RosPack()
@@ -16,8 +15,6 @@ sys.path.append(agent_base_path)
 robogpt_env_path = os.path.join(agent_base_path, "config", ".demo_env")
 import scripts.agent_utils as agu
 
-
-TOUR_RUNNING = True
 
 def load_keys(keys_path):
         """
@@ -94,14 +91,19 @@ class Guide():
             model=self.model,
             messages=[
                 {"role": "system", "content": (
-                        "You are a helpful tour assistant, guiding the user through the following tour steps: \n"
-                        f"{self.user_steps}\n\n"
-                        "Your goal is to ensure the user progresses smoothly through the steps. If the user reports an issue:\n"
-                        "- First, confirm whether the issue is resolved.\n"
-                        "- If resolved, acknowledge it positively and encourage them to move forward.\n"
-                        "- If not resolved, provide a clear and actionable solution to help them proceed.\n\n"
-                        f"Current step: {current_step}"
-                    )},
+                    f"You are a helpful tour assistant, guiding the user through the following tour steps: {self.user_steps}\n"
+                    "Your goal is to ensure the user progresses smoothly through the steps.\n"
+                    "If the user reports an issue:\n"
+                    "- First, confirm whether the issue is resolved.\n"
+                    "- If resolved, acknowledge it positively and encourage them to move forward.\n"
+                    "- If not resolved, provide a clear and actionable solution to help them proceed.\n\n"
+                    "- The steps must be followed sequentially, one at a time, starting from the first and progressing in order.\n"
+                    "- If the user attempts to skip a step or jump ahead, gently guide them back to the correct step and ensure completion before moving forward.\n"
+                    "- If the user successfully completes a step, provide positive feedback and confirm their progress to the next step.\n"
+                    "- If the step is not completed correctly, give negative feedback explaining what went wrong and instruct them to retry the step.\n"
+                    f"Current step: {current_step}\n"
+                    "You must track progress strictly, ensuring the user does not proceed until the current step is fully completed."
+                )},
                 {"role": "user", "content": prompt}
                 ]
             )
@@ -111,12 +113,14 @@ class Guide():
          response = openai.ChatCompletion.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": f"The system response is: {system_response}. "
+                {"role": "system", "content": (
+                    f"The system response is: {system_response}. "
                     f"The step we followed is: {current_step}. "
                     f"Determine if the step is successfully completed based on the system response. "
                     f"If there are any mentions of errors, troubleshooting, retries, or failures, respond with 'no'. "
-                    f"If the system response confirms success or gives a positive acknowledgment, respond with 'yes'. "
-                    f"Only respond with 'yes' or 'no', nothing else."}
+                    f"If the system response confirms success with respect to the current step or gives a positive acknowledgment for the same, respond with 'yes'. "
+                    "Only respond with 'yes' or 'no', nothing else."
+                )}
                 ]
             )
          return response['choices'][0]['message']['content']
@@ -138,7 +142,7 @@ class Guide():
             if not line:
                 continue  # If no line is read, continue waiting
 
-            print("Raw line in server:", line)  # Debug: print the raw line
+            print("Raw line in server:", line)
                 
             json_match = re.search(r'message=({.*})', line)
             if not json_match:
