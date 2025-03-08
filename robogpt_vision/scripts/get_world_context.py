@@ -377,9 +377,8 @@ class XImgToBaseImplementation:
             NotImplementedError: Always raised as async is not supported.
         """
         raise NotImplementedError("XImgToBaseImplementation does not support async operations.")
-
-
-if __name__ == "__main__":
+    
+def main():
     try:
         # Instantiate the service class
         service_instance = XImgToBaseImplementation()
@@ -388,3 +387,7 @@ if __name__ == "__main__":
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("ROS Interrupt Exception caught. Shutting down.")
+
+
+if __name__ == "__main__":
+    main()

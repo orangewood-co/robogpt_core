@@ -107,7 +107,7 @@ def get_user_input(title, prompt):
     root.withdraw()
     return simpledialog.askstring(title, prompt)
 
-if __name__ == "__main__":
+def main():
     all_rs_device_info = get_profiles()
     config_out = {}
     for j, device_info in enumerate(all_rs_device_info):
@@ -143,6 +143,9 @@ if __name__ == "__main__":
             elif key == ord("n"):
                 cv2.destroyAllWindows()
                 break
+
+if __name__ == "__main__":
+    main()
 
 
 

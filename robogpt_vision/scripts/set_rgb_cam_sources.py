@@ -66,7 +66,7 @@ def get_user_input(title, prompt):
     root.withdraw()
     return simpledialog.askstring(title, prompt)
 
-if __name__ == "__main__":
+def main():
     working_webcams = find_working_webcams()
     selected_webcams = {}
 
@@ -110,3 +110,7 @@ if __name__ == "__main__":
 
     save_to_json_file(selected_webcams, json_filename)
     print(f"Selected webcams list saved to {json_filename}")
+
+
+if __name__ == "__main__":
+    main()
