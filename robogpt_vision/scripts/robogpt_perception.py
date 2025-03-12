@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import os
 import sys
 import cv2
@@ -289,7 +290,7 @@ class ObjectDetectionImplementation:
                 rospy.loginfo("Exit signal received via keyboard.")
                 break
 
-if __name__ == "__main__":
+def main():
     # Initialize the ROS node
     rospy.init_node("Object_detection_node")
 
@@ -306,3 +307,6 @@ if __name__ == "__main__":
 
     except rospy.ROSInterruptException:
         rospy.loginfo("ROS Interrupt Exception occurred. Node terminated.")
+
+if __name__ == "__main__":
+    main()
