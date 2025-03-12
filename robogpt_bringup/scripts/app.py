@@ -172,7 +172,7 @@ class MainApp(QWidget):
 
         # Create and add 7 labeled dropdowns
         self.dropdowns = []
-        drop_labels = ["Robot Name", "Use Case", "Type", "Drivers", "Use Sim", "Dalus Viewer"]
+        drop_labels = ["Robot Name", "Use Case", "Type", "Drivers", "Use Sim", "Sim Vision"]
         dropdown_options = [
             ["ec63", "ec612", "owl68", "owl65", "ec66","tm5"],  
             ["base", "pick_and_place", "archform", "gazebo_skills","sf_demo"],          
@@ -251,7 +251,7 @@ class MainApp(QWidget):
         self.use_sim = "true"
         self.sim_vision = "on"
         self.robot_ip = "192.168.1.200"
-        self.dalus_viewer = "off"
+        self.sim_vision = "off"
 
     # Slot function to update robot_ip
     def update_robot_ip(self):
@@ -274,7 +274,7 @@ class MainApp(QWidget):
         elif sender == self.dropdowns[4]:
             self.use_sim = selected_text
         elif sender == self.dropdowns[5]:
-            self.dalus_viewer = selected_text
+            self.sim_vision = selected_text
 
     # Placeholder functions for button actions
     def open_config_file(self):
@@ -531,13 +531,6 @@ class MainApp(QWidget):
 
             bringup_process = launch_with_delay('robogpt_bringup bringup.launch',args=args, delay=5)
             url = QUrl("https://robogpt.orangewood.co/chat")
-            if self.dalus_viewer=="on":
-                current_dir = os.path.dirname(os.path.abspath(__file__))
-                # The bash script "run_dalus.sh" is expected to be in the same directory as this file.
-                dalus_script = os.path.join(current_dir, "run_dalus.sh")
-                print(f"Executing dalus script at: {dalus_script}")
-                # Launch the script in parallel without blocking the main process
-                subprocess.Popen(["bash", dalus_script])
             QDesktopServices.openUrl(url)
             bringup_process.wait()  
 

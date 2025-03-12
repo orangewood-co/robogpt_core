@@ -7,11 +7,14 @@ import yaml
 import uuid
 import dotenv
 import rospy
+import time
 import getpass
 import rospkg
 import pusher
 import requests
 import subprocess
+import pusherclient
+from queue import Queue
 from urllib.parse import urlsplit, unquote
 
 rospack = rospkg.RosPack()
@@ -86,52 +89,6 @@ def load_env_variables(env_file):
     
     return env_vars
     
-def pusher_listener(app_id):
-    """
-    Subscribes to a Pusher channel and retrieves messages containing prompts.
-
-    Args:
-        app_id (str): The Pusher app ID.
-
-    Returns:
-        tuple: A tuple containing the prompt text, its associated ID, and the URL.
-    """
-    output_file = os.path.join(base_agent, "config/pusher_config/output.json")
-    command = f"pusher channels apps subscribe --app-id {app_id} --channel private-chat"
-
-    process = subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-    )
-
-    with open(output_file, "w") as f:
-        for line in process.stdout:
-            print("Raw line:", line)  # Debug: print the raw line
-
-            if "event=chatbox" not in line:
-                continue
-
-            json_match = re.search(r'message=({.*})', line)
-            if not json_match:
-                continue
-
-            json_str = json_match.group(1)
-            try:
-                data = json.loads(json_str)
-            except json.JSONDecodeError as e:
-                print("JSON decode error:", e)
-                continue
-
-            prompt = data.get("message", "")
-            id = data.get("id", "")
-
-            url_match = re.search(r'https?://[^\s"]+', prompt)
-            url = url_match.group(0) if url_match else None
-
-            print("Prompt:", prompt)
-            return prompt, id, url
-
-
-
 def translate_text(key, endpoint, location, text_to_translate, to_language="en"):
     """
     Translates the given text to the specified language using Azure Translator.
