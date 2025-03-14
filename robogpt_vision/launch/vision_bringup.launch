@@ -10,10 +10,17 @@
     <param name="comp_name" value="$(arg comp_name)"/>
 
     <!-- Launching the vision startup node -->
-    <node pkg="robogpt_vision" type="run_vision_start.py" name="start_vision"/>    
+    <node pkg="robogpt_vision" type="node_runner.py" name="start_vision">
+        <param name="node_name" value="vision_startup"/>
+    </node>
 
+    <node pkg="robogpt_vision" type="node_runner.py" name="get_world_context_service" output="screen">
+        <param name="node_name" value="pose_service"/>
+    </node>
 
-    <node pkg="robogpt_vision" type="run_get_world_context.py" name="get_world_context_service" output="screen" />
+    <node pkg="robogpt_vision" type="node_runner.py" name="web_feed" output="screen">
+        <param name="node_name" value="web_feed"/>
+    </node>
     <node pkg="auto_train_ros" type="auto_train_server.py" name="auto_train_server" output="screen" />
 
     

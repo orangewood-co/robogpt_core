@@ -3,8 +3,9 @@
 
     <arg name="camera_name" default="camera"/>
 
-    <node pkg="robogpt_vision" type="robogpt_perception.py" name="Object_detection_node" output="screen">    
+    <node pkg="robogpt_vision" type="node_runner.py" name="Object_detection_node" output="screen">    
         <param name="camera_name" value="$(arg camera_name)" />
+        <param name="node_name" value="perception"/>
     </node>
 
 </launch>

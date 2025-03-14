@@ -173,7 +173,7 @@ class PerformanceMonitor:
             return 0
         return len(self.frame_times) / sum(self.frame_times)
 
-if __name__ == "__main__":
+def main():
     # Configuration options
     TARGET_FPS = 30  # Adjust based on your needs
     QUALITY = 80
@@ -192,3 +192,6 @@ if __name__ == "__main__":
             time.sleep(0.1)
     except KeyboardInterrupt:
         streamer.stop()
+
+if __name__=="__main__":
+    main()

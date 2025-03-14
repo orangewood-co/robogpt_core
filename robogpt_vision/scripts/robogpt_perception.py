@@ -290,7 +290,7 @@ class ObjectDetectionImplementation:
                 rospy.loginfo("Exit signal received via keyboard.")
                 break
 
-def main():
+def run():
     # Initialize the ROS node
     rospy.init_node("Object_detection_node")
 
@@ -309,4 +309,4 @@ def main():
         rospy.loginfo("ROS Interrupt Exception occurred. Node terminated.")
 
 if __name__ == "__main__":
-    main()
+    run()
