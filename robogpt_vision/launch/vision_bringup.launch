@@ -13,7 +13,6 @@
     <node pkg="robogpt_vision" type="vision_startup.py" name="start_vision">    
     </node>
 
-
     <node pkg="robogpt_vision" type="get_world_context.py" name="get_world_context_service" output="screen" />
     <node pkg="auto_train_ros" type="auto_train_server.py" name="auto_train_server" output="screen" />
 
@@ -21,7 +20,7 @@
     <node pkg="robogpt_vision" type="web_feed.py" name="web_feed" >    
     </node>
 
-     <!-- Sending the video feed to web pub sub -->
+     Sending the video feed to web pub sub
     <node pkg="robogpt_vision" type="feed_mask.py" name="masked_feed" >    
     </node>
     

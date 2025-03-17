@@ -14,7 +14,7 @@ agent_base_path = rospack.get_path('robogpt_agents')
 sys.path.append(agent_base_path)
 robogpt_env_path = os.path.join(agent_base_path, "config", ".demo_env")
 import scripts.agent_utils as agu
-
+from scripts.pusher_auth import pusher_listener
 
 def load_keys(keys_path):
         """
@@ -47,19 +47,12 @@ class Guide():
                 secret=self.keys['PUSHER_SECRET'],
                 cluster=self.keys['NEXT_PUBLIC_PUSHER_CLUSTER']
             )
-          
+          self.client_id = rospy.get_param("client_id",default=None)
+
+          self.pusher = pusher_listener(app_id=self.keys['PUSHER_APP_ID'],public_key=self.keys['NEXT_PUBLIC_PUSHER_KEY'],secret=self.keys['PUSHER_SECRET'],cluster=self.keys['NEXT_PUBLIC_PUSHER_CLUSTER'],channel="private-chat",api_key=self.keys['DEFAULT_PUSHER_KEY'],event='chatbox')
+
           openai.api_key = self.keys['OPENAI_API_KEY']
-
-     def send_msg(self, pusher_client, message):
-        """
-        Sends a message to a specified Pusher channel.
-
-        Args:
-            pusher_client: The Pusher client instance.
-            message (str): The message to send.
-        """
-        pusher_client.trigger('private-chat', 'evt::test', {'message': message})
-          
+   
      def read_script(self):
         with open(self.script_path, "r") as file:
             script = file.read()
@@ -169,7 +162,7 @@ class Guide():
      
      def information_flow(self):
         formatted_steps = self.format_steps()
-        agu.send_msg(pusher_client=self.pusher_client, message=formatted_steps[0])
+        self.pusher.send_msg(message=formatted_steps[0], user=self.client_id)
 
         app_id = self.keys['PUSHER_APP_ID']
 
@@ -191,9 +184,9 @@ class Guide():
             print(f"CONFIRMATION: {confirmation}")
             if confirmation.strip().lower() == "yes":
                 if self.counter+1 < len(formatted_steps):
-                    agu.send_msg(pusher_client=self.pusher_client, message=formatted_steps[self.counter+1])
+                    self.pusher.send_msg(message=formatted_steps[self.counter+1],user=self.client_id)
                 elif self.counter == len(formatted_steps)-1:
-                    agu.send_msg(pusher_client=self.pusher_client, message="Thank you for  joining the tour. Enjoy exploring RoboGPT!")
+                    self.pusher.send_msg(message="Thank you for  joining the tour. Enjoy exploring RoboGPT!",user=self.client_id)
                 self.counter += 1
             
             while confirmation.strip().lower() == "no":
@@ -204,9 +197,6 @@ class Guide():
                 # if confirmation.strip().lower() == "yes":
                 #     self.counter += 1
                 
-
-     
-
 """
 - formatted step
 

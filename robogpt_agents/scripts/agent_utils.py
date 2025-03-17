@@ -48,16 +48,6 @@ def load_robot_poses(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)
 
-def send_msg(pusher_client, message):
-    """
-    Sends a message to a specified Pusher channel.
-
-    Args:
-        pusher_client: The Pusher client instance.
-        message (str): The message to send.
-    """
-    pusher_client.trigger('private-chat', 'evt::test', {'message': message})
-
 def load_env_variables(env_file):
     # Load the environment variables from the .env file into os.environ
     dotenv.load_dotenv(env_file)
@@ -77,61 +67,7 @@ def load_env_variables(env_file):
     
     # Return the environment variables as a dictionary
     return env_vars
-    
-def local_prompt(app_id):
-    """
-    Subscribes to a Pusher channel and retrieves messages containing prompts.
-    Extracts the prompt text, an ID (if present), and any URL found in the prompt text.
-
-    Returns:
-        tuple: A tuple containing the prompt text, its associated ID (empty string if not found),
-               and the URL (or None if not present).
-    """
-    output_file = os.path.join(base_agent, "config/tools_config/output.json")
-    command = f"pusher channels apps subscribe --app-id {app_id} --channel private-chat"
-
-    # Execute the command to subscribe to the Pusher channel and process the output
-    process = subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-    )
-
-    with open(output_file, "w") as f:
-        for line in process.stdout:
-            print("Raw line:", line)  # Debug: print the raw line
-
-            # Filter: Only process messages with event 'chatbox'
-            if "event=chatbox" not in line:
-                continue
-
-            # Use a regex to extract the JSON portion from the line.
-            # This looks for the substring starting with 'message=' and then a { ... } block.
-            json_match = re.search(r'message=({.*})', line)
-            if not json_match:
-                continue  # if the JSON block isn't found, skip this line
-
-            json_str = json_match.group(1)
-            try:
-                data = json.loads(json_str)
-            except json.JSONDecodeError as e:
-                print("JSON decode error:", e)
-                continue
-
-            # Extract the prompt text. In your original message, the prompt is under the "message" key.
-            prompt = data.get("message", "")
-            # If there is an ID field in the JSON, extract it. Otherwise, default to an empty string.
-            id = data.get("id", "")
-
-            # Use a regex to search for a URL in the prompt text.
-            # This regex will match http:// or https:// followed by non-whitespace, non-quote characters.
-            url_match = re.search(r'https?://[^\s"]+', prompt)
-            url = url_match.group(0) if url_match else None
-
-            # Debug prints
-            print("Prompt:", prompt)
-            return prompt, id, url
-
-
-
+   
 def translate_text(key,endpoint,location,text_to_translate, to_language="en"):
     """
     Translates the given text to the specified language using Azure Translator.
@@ -319,5 +255,4 @@ def ai_formatted_msg(message: str) -> str:
         rephrased_response = llm([HumanMessage(content=formatted_prompt)])
         msg_content = rephrased_response.content if hasattr(rephrased_response, "content") else str(rephrased_response)
         # Send the message to the web app
-        send_msg(pusher_client=pusher_client, message=msg_content)
         return msg_content
