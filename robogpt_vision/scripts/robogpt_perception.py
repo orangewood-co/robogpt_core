@@ -292,7 +292,7 @@ class ObjectDetectionImplementation:
 
 def run():
     # Initialize the ROS node
-    rospy.init_node("Object_detection_node")
+    # rospy.init_node("Object_detection_node")
 
     # Create an instance of the detection class
     object_detection = ObjectDetectionImplementation()

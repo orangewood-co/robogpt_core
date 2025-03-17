@@ -74,7 +74,7 @@ class XImgToBaseImplementation:
         """
         Initializes the ROS node and service.
         """
-        rospy.init_node('get_world_context_service')
+        # rospy.init_node('get_world_context_service')
         service = rospy.Service('get_world_context', GetWorldContext, self._run)
         rospy.loginfo("Service 'get_world_context' is ready")
         self.robot_name = rospy.get_param("/robot_model", default="sim")

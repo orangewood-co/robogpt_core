@@ -28,7 +28,7 @@ class WebcamStreamer:
             resize_factor (float): The factor by which to resize frames.
             buffer_size (int): The size of the frame buffer.
         """
-        rospy.init_node("Web_App_Feed_Node")
+        # rospy.init_node("Web_App_Feed_Node")
         self.type = type
         self.camera_id = camera_id
         if self.type == "live":

@@ -7,7 +7,7 @@ import cv2
 
 def main():
     # Initialize the ROS node
-    rospy.init_node('camera_publisher', anonymous=True)
+    # rospy.init_node('camera_publisher', anonymous=True)
 
     # Create a publisher for the camera feed
     pub = rospy.Publisher('/live_feed', Image, queue_size=10)

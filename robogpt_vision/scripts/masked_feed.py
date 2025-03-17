@@ -198,6 +198,6 @@ class ObjectDetector:
 
 
 if __name__ == "__main__":
-    rospy.init_node('object_detector', anonymous=True)
+    # rospy.init_node('object_detector', anonymous=True)
     detector = ObjectDetector(image_topic="/camera/image")
     detector.run()

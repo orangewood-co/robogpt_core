@@ -19,7 +19,7 @@ sys.path.append(package_path)
 try:
     file_path = 'scripts.robogpt_perception'
     object_detection = importlib.import_module(file_path)
-    object_detection = getattr(object_detection, 'object_detection_implementation')
+    object_detection = getattr(object_detection, 'ObjectDetectionImplementation')
 except Exception as err:
     print("Could not load perception files due to ", err)
 
@@ -89,7 +89,7 @@ class VisionLauncher:
     def run(self):
         """Main execution method to start vision processes"""
         try:
-            rospy.init_node("start_vision", anonymous=True)
+            # rospy.init_node("start_vision", anonymous=True)
             cams = rospy.get_param("number_of_cams", default=1)
             print(cams)
 

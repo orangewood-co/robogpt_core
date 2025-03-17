@@ -9,6 +9,7 @@ import web_feed
 from vision_startup import VisionLauncher
 from get_world_context import XImgToBaseImplementation
 
+rospy.init_node("node_runner")
 
 def perception_run():
     try:

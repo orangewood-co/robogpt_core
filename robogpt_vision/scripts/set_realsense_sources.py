@@ -10,7 +10,7 @@ import tkinter as tk
 import pyrealsense2 as rs
 from tkinter import simpledialog
 
-rospy.init_node("stereo_camera_setup", anonymous=True)
+# rospy.init_node("stereo_camera_setup", anonymous=True)
 
 def get_profiles():
     """Retrieves the profiles of connected RealSense devices.

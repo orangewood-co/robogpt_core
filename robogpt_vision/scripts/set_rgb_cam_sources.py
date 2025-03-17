@@ -12,7 +12,7 @@ import tkinter as tk
 from tkinter import simpledialog
 from imutils.video import VideoStream
 
-rospy.init_node("rgb_camera_setup", anonymous=True)
+# rospy.init_node("rgb_camera_setup", anonymous=True)
 
 def find_working_webcams(max_cameras=10):
     """Finds and returns a list of working webcams.
