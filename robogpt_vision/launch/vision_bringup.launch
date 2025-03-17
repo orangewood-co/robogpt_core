@@ -20,8 +20,7 @@
     <node pkg="robogpt_vision" type="web_feed.py" name="web_feed" >    
     </node>
 
-     Sending the video feed to web pub sub
-    <node pkg="robogpt_vision" type="feed_mask.py" name="masked_feed" >    
-    </node>
+    <!-- <node pkg="robogpt_vision" type="feed_mask.py" name="masked_feed" >    
+    </node> -->
     
 </launch>

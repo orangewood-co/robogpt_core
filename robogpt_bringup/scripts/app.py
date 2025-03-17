@@ -172,14 +172,14 @@ class MainApp(QWidget):
 
         # Create and add 7 labeled dropdowns
         self.dropdowns = []
-        drop_labels = ["Robot Name", "Use Case", "Type", "Drivers", "Use Sim", "Dalus Viewer"]
+        drop_labels = ["Robot Name", "Use Case", "Type", "Drivers", "Use Sim", "Enable Vision"]
         dropdown_options = [
-            ["ec63", "ec612", "owl68", "owl65", "ec66","tm5"],  
+            ["owl65","ec63", "ec612", "owl68","ec66","tm5"],  
             ["base", "pick_and_place", "archform", "gazebo_skills","sf_demo"],          
-            ["description", "moveit"],               
+            ["moveit", "description"],               
             ["moveit", "robotiq", "both", "none"],        
             ["true", "false"],  
-            ["off","on"], 
+            ["false", "true"], 
         ]
 
         for i in range(len(drop_labels)):  # Use length of drop_labels
@@ -244,14 +244,15 @@ class MainApp(QWidget):
         self.setLayout(main_layout)
 
         # Default values to Variables to store dropdown selections and Robot IP
-        self.robot_name = "ec63"
-        self.use_case = "base"
-        self.type = "description"
-        self.driver = "none"
-        self.use_sim = "true"
-        self.sim_vision = "on"
-        self.robot_ip = "192.168.1.200"
+        self.robot_name = "owl65"
+        self.use_case = "sf_demo"
+        self.type = "moveit"
+        self.driver = "moveit"
+        self.use_sim = "false"
+        self.use_vision = "false"
+        self.robot_ip = "10.42.0.54"
         self.dalus_viewer = "off"
+        self.sim_vision = "off"
 
     # Slot function to update robot_ip
     def update_robot_ip(self):
@@ -274,7 +275,7 @@ class MainApp(QWidget):
         elif sender == self.dropdowns[4]:
             self.use_sim = selected_text
         elif sender == self.dropdowns[5]:
-            self.dalus_viewer = selected_text
+            self.use_vision = selected_text
 
     # Placeholder functions for button actions
     def open_config_file(self):
@@ -526,18 +527,11 @@ class MainApp(QWidget):
     def start_robogpt(self):
         # Print all the dropdown values when start button is pressed
         try:
-            args = [f'robot_name:={self.robot_name}',f'use_case:={self.use_case}',f'type:={self.type}',f'driver:={self.driver}',f'use_sim:={self.use_sim}',f'sim_vision:={self.sim_vision}',f'robot_ip:={self.robot_ip}']
+            args = [f'robot_name:={self.robot_name}',f'use_case:={self.use_case}',f'type:={self.type}',f'driver:={self.driver}',f'use_sim:={self.use_sim}',f'use_vision:={self.use_vision}',f'sim_vision:={self.sim_vision}',f'robot_ip:={self.robot_ip}']
             print(f"Here is the List of Arguments: {args}")
 
             bringup_process = launch_with_delay('robogpt_bringup bringup.launch',args=args, delay=5)
-            url = QUrl("https://robogpt.orangewood.co/chat")
-            if self.dalus_viewer=="on":
-                current_dir = os.path.dirname(os.path.abspath(__file__))
-                # The bash script "run_dalus.sh" is expected to be in the same directory as this file.
-                dalus_script = os.path.join(current_dir, "run_dalus.sh")
-                print(f"Executing dalus script at: {dalus_script}")
-                # Launch the script in parallel without blocking the main process
-                subprocess.Popen(["bash", dalus_script])
+            url = QUrl("https://robogpt.orangewood.co")
             QDesktopServices.openUrl(url)
             bringup_process.wait()  
 
