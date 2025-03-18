@@ -196,26 +196,50 @@ class object_detection_implementation:
         start_time = time.time()
         image_sent = False
         
-        while True:
-
+        # Wait for camera data to be available
+        rospy.loginfo("Waiting for camera data to be published...")
+        max_wait_time = 60  # Maximum wait time in seconds
+        wait_start_time = time.time()
+        
+        while self.color_frame is None or self.depth_frame is None:
+            elapsed_wait = time.time() - wait_start_time
+            if elapsed_wait > max_wait_time:
+                rospy.logerr(f"Timed out after {max_wait_time} seconds waiting for camera data.")
+                rospy.logerr("Please check if the camera node is running and publishing data.")
+                return
+            
+            # Print status message every 5 seconds
+            if int(elapsed_wait) % 5 == 0 and int(elapsed_wait) > 0:
+                rospy.loginfo(f"Still waiting for camera data... ({int(elapsed_wait)}s)")
+            
+            time.sleep(0.1)  # Sleep to avoid CPU spin
+            
+        rospy.loginfo("Camera data received! Starting object detection...")
+        
+        while not rospy.is_shutdown():
             # Reading algorithm configuration data
-            f = open(robot_camera_path)
-            robogpt_data = json.loads(f.read())
-            algorithm_list = robogpt_data["object_detection_alg"]
-            f.close()
+            try:
+                f = open(robot_camera_path)
+                robogpt_data = json.loads(f.read())
+                algorithm_list = robogpt_data["object_detection_alg"]
+                f.close()
+            except Exception as e:
+                rospy.logerr(f"Error reading algorithm configuration: {e}")
+                time.sleep(1)
+                continue
 
             detection_results = {}
-            i = 0
-            if self.color_frame is None: # If the camera feed is None
-                rospy.logerr("No frame detected. Please check the Topic name.") 
-                time.sleep(0.1)
-                rospy.logerr("Exiting Vision stack")
-                break
+            
+            # Verify that we still have camera data
+            if self.color_frame is None or self.depth_frame is None:
+                rospy.logwarn("Camera data lost. Waiting for new data...")
+                time.sleep(1)
+                continue
 
             color_frame_copy = np.copy(self.color_frame)
             depth_frame_copy = np.copy(self.depth_frame)
             
-           
+        
             # Running the algorithms layer specified by the user
             for algorithms in algorithm_list:
                 if algorithms == "color_detection":
@@ -228,7 +252,12 @@ class object_detection_implementation:
                 detection_results = self.extract_3d_info(detection_results,color_frame_copy,depth_frame_copy)
             
             # Saving the results in detection_results.json
-            robot_dict = json.loads(open(detection_results_path).read())
+            try:
+                with open(detection_results_path, 'r') as f:
+                    robot_dict = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                robot_dict = {}
+                
             robot_dict[self.cam_name] = detection_results
 
             # robot_dict = self.detection_buffer.merge_frames(robot_dict,camera_ip)
@@ -247,7 +276,7 @@ class object_detection_implementation:
                 with open(f"{detection_results_path}", 'w') as f:
                     json.dump(robot_dict, f)
             except Exception as e:
-                print("write to file failed - saving detection results", e)
+                rospy.logerr(f"Write to file failed - saving detection results: {e}")
 
             # Displaying the bounding boxes and object class on color frame
             if bool(detection_results):
