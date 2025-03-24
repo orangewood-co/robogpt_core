@@ -13,8 +13,6 @@ import struct
 from ultralytics import YOLO
 from scipy.stats import trim_mean
 
-
-
 class YoloV8Detection:
     ''' Implements a fintuned yoloV5 model on custom weights.
 
@@ -32,7 +30,9 @@ class YoloV8Detection:
         rospack = rospkg.RosPack()
         package_path = rospack.get_path('robogpt_vision')
         self.robogpt_config = os.path.join(package_path,"config/vision_config.json")
-        self.weights_path = os.path.join(package_path,"scripts/object_detection/weights/veggies.pt")
+        self.weights = self.read_initial_weights(self.robogpt_config)
+        self.weights_path = os.path.join(package_path,self.weights)
+        print(self.weights_path)
         rospy.loginfo("Initiating YoloV8 Model")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = YOLO(self.weights_path).to(self.device)
@@ -95,6 +95,14 @@ class YoloV8Detection:
         
         # Return the value for the key 'new_weights'
         return data.get('new_weights')
+
+    def read_initial_weights(self,json_file):
+        # Read the JSON data from the file
+        with open(json_file, 'r') as file:
+            data = json.load(file)
+        
+        # Return the value for the key 'new_weights'
+        return data.get('initial_weights')
     
     def clear_weights(self,file_path):
 

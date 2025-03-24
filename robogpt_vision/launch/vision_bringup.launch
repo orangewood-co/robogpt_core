@@ -22,12 +22,8 @@
     <node pkg="auto_train_ros" type="auto_train_server.py" name="auto_train_server" output="screen" />
 
     <!-- Sending the video feed to web pub sub -->
-    <node pkg="robogpt_vision" type="node_runner.py" name="web_feed" output="screen">
-        <param name="node_name" value="web_feed"/>
+    <node pkg="robogpt_vision" type="init_webfeed.py" name="webfeed" output="screen">
+        <param name="/web_topic" value="/web_feed"/>
     </node>
-
-
-    <!-- <node pkg="robogpt_vision" type="feed_mask.py" name="masked_feed" >    
-    </node> -->
     
 </launch>
