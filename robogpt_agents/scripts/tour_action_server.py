@@ -2,8 +2,8 @@
 
 import rospy
 import actionlib
-from robogpt_agents.msg import TourAction, TourFeedback, TourResult
 from tours import Guide
+from robogpt_agents.msg import TourAction, TourFeedback, TourResult
 
 class TourActionServer:
     def __init__(self):
@@ -18,12 +18,6 @@ class TourActionServer:
         print("Guide loaded")
         tour.information_flow()
         print("infro started")
-        # success = True
-        # feedback = "Pick and Place Tour completed!"
-
-        # result = TourResult()
-        # result.success = success
-        # self.server.set_succeeded(result, feedback)
 
 if __name__ == "__main__":
     rospy.init_node("tour_action_server")

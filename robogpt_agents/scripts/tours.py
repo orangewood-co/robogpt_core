@@ -11,10 +11,9 @@ import re
 # Get package path and add it to sys.path
 rospack = rospkg.RosPack()
 agent_base_path = rospack.get_path('robogpt_agents')
-sys.path.append(agent_base_path)
 robogpt_env_path = os.path.join(agent_base_path, "config", ".demo_env")
-import scripts.agent_utils as agu
-from scripts.pusher_auth import pusher_listener
+import agent_utils as agu
+from pusher_auth import pusher_listener
 
 def load_keys(keys_path):
         """
@@ -30,7 +29,7 @@ def load_keys(keys_path):
                 if '=' in line:
                     key, value = line.strip().split('=', 1)
                     keys[key] = value
-        
+       
         return keys
      
 class Guide():
