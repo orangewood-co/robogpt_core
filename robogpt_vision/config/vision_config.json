@@ -8,8 +8,11 @@
     "objects_to_detect": [
         "onion",
         "tomato",
-        "potato"
+        "potato",
+        "baniya",
+        "baniya"
     ],
     "new_weights": "",
-    "old_data_set": "auto_train_data/train_v20240703194007"
+    "old_data_set": "",
+    "initial_weights": "scripts/object_detection/weights/veggies.pt"
 }

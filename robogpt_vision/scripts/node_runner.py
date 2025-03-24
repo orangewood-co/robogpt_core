@@ -1,65 +1,96 @@
 #!/usr/bin/env python3
+"""
+ROS node runner for vision-related services.
+Launches different vision components based on provided parameters.
+"""
+
+import sys
+from typing import NoReturn
 
 import rospy
 
+# Local imports
 from robogpt_perception import object_detection_implementation
-import set_realsense_sources as set_realsense_sources
-import set_rgb_cam_sources as set_rgb_cam_sources
-import web_feed as web_feed
-from vision_startup import VisionLauncher
 from get_world_context import ximg2xbase_implementation
+from vision_startup import VisionLauncher
+import set_realsense_sources
+import set_rgb_cam_sources
 
-rospy.init_node("node_runner")
-
-def perception_run():
+def perception_run() -> None:
+    """Run the object detection process."""
     try:
-        # Run the object detection process
+        rospy.loginfo("Starting object detection process")
         object_detection = object_detection_implementation()
         object_detection._run()
-
     except Exception as ex:
-        rospy.loginfo(ex)
+        rospy.logerr(f"Error in object detection: {ex}")
 
-def realsense_setup():
+def realsense_setup() -> None:
+    """Configure RealSense camera sources."""
     try:
-        rospy.loginfo("Running Realsense setup")
+        rospy.loginfo("Running RealSense setup")
         set_realsense_sources.main()
+        rospy.loginfo("RealSense setup completed successfully")
     except Exception as ex:
-        rospy.loginfo(ex)
+        rospy.logerr(f"Error in RealSense setup: {ex}")
 
-def rgb_setup():
+def rgb_setup() -> None:
+    """Configure RGB camera sources."""
     try:
+        rospy.loginfo("Running RGB camera setup")
         set_rgb_cam_sources.main()
+        rospy.loginfo("RGB camera setup completed successfully")
     except Exception as ex:
-        rospy.loginfo(ex)
+        rospy.logerr(f"Error in RGB camera setup: {ex}")
 
-def pose_calculator_service():
+def pose_calculator_service() -> NoReturn:
+    """Start the pose calculator service and keep it running."""
     try:
-        # Instantiate the service class
+        rospy.loginfo("Starting pose calculator service")
         service_instance = ximg2xbase_implementation()
+        # Keep the service running
         rospy.spin()
-
     except rospy.ROSInterruptException:
-        rospy.loginfo("ROS Interrupt Exception caught. Shutting down.")
+        rospy.loginfo("ROS Interrupt Exception caught. Shutting down pose calculator service.")
+    except Exception as ex:
+        rospy.logerr(f"Error in pose calculator service: {ex}")
 
-def vision_startup():
-    launcher = VisionLauncher()
-    launcher.run()
+def vision_startup() -> None:
+    """Initialize and run the vision system."""
+    try:
+        rospy.loginfo("Starting vision system")
+        launcher = VisionLauncher()
+        launcher.run()
+        rospy.loginfo("Vision system started successfully")
+    except Exception as ex:
+        rospy.logerr(f"Error in vision startup: {ex}")
 
-def feed():
-    web_feed.main()
+def main() -> int:
+    """Main entry point for the node runner."""
+    try:
+        rospy.init_node("node_runner")
+        
+        node = rospy.get_param("~node_name")
+        rospy.loginfo(f"Starting node: {node}")
+        
+        if node == "pose_service":
+            pose_calculator_service()
+        elif node == "vision_startup":
+            vision_startup()
+        elif node == "rgb_setup":
+            rgb_setup()
+        elif node == "realsense_setup":
+            realsense_setup()
+        elif node == "perception":
+            perception_run()
+        else:
+            rospy.logerr(f"Unknown node type: {node}")
+            return 1
+            
+        return 0
+    except Exception as ex:
+        rospy.logerr(f"Unexpected error in node runner: {ex}")
+        return 1
 
-if __name__=="__main__":
-    node = rospy.get_param("~node_name")
-    if node == "pose_service":
-        pose_calculator_service()
-    if node == "vision_startup":
-        vision_startup()
-    if node == "rgb_setup":
-        rgb_setup()
-    if node == "realsense_setup":
-        realsense_setup()
-    if node == "perception":
-        perception_run()
-    if node == "web_feed":
-        feed()
+if __name__ == "__main__":
+    sys.exit(main())

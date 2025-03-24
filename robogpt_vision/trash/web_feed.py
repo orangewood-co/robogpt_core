@@ -15,7 +15,7 @@ CLOUD_SERVER = "https://janatics.video.api.orangewood.co"
 class WebcamStreamer:
     """Streams video from a webcam and sends frames to a cloud server."""
 
-    def __init__(self, type, camera_id, endpoint, target_fps=30, quality=70,
+    def __init__(self,camera_id, endpoint, image_topic = "/web_feed",  target_fps=30, quality=70,
                  resize_factor=1.0, buffer_size=2):
         """Initializes the WebcamStreamer.
 
@@ -29,11 +29,8 @@ class WebcamStreamer:
             buffer_size (int): The size of the frame buffer.
         """
         # rospy.init_node("Web_App_Feed_Node")
-        self.type = type
         self.camera_id = camera_id
-        if self.type == "live":
-            self.camera = cv2.VideoCapture(camera_id)
-
+        self.image_topic = image_topic
         self.endpoint = endpoint
         self.running = True
         self.quality = quality
@@ -45,7 +42,7 @@ class WebcamStreamer:
         # Setting the ros parameters 
         self.cam_name = rospy.get_param("/Object_detection_node/camera_name",default="camera")
 
-        self.image_sub = rospy.Subscriber(f"/web_feed", Image, self.color_callback)
+        self.image_sub = rospy.Subscriber(self.image_topic, Image, self.color_callback)
         # self.image_sub = rospy.Subscriber(f"/dalus_sim_image", Image, self.color_callback)
 
         self.color_frame = None
@@ -111,16 +108,10 @@ class WebcamStreamer:
             if current_time - last_frame_time < self.frame_time:
                 continue
 
-            if self.type == "detection" and self.color_frame is not None:
+            if self.color_frame is not None:
                 frame = self.color_frame
                 self._process_frame(frame)
                 last_frame_time = current_time
-
-            elif self.type == "live":
-                ret, frame = self.camera.read()
-                if ret:
-                    self._process_frame(frame)
-                    last_frame_time = current_time
 
     def _process_frame(self, frame):
         """Processes and encodes a frame, then adds it to the send queue.
@@ -176,25 +167,3 @@ class PerformanceMonitor:
             return 0
         return len(self.frame_times) / sum(self.frame_times)
 
-def main():
-    # Configuration options
-    TARGET_FPS = 30  # Adjust based on your needs
-    QUALITY = 80
-    RESIZE_FACTOR = 1.0
-    BUFFER_SIZE = 2
-
-    monitor1 = PerformanceMonitor()
-    streamer = WebcamStreamer("detection", 4, "upload1", TARGET_FPS, QUALITY, RESIZE_FACTOR, BUFFER_SIZE)
-    streamer.start()
-
-    try:
-        while True:
-            monitor1.update()
-            if time.time() % 5 < 0.1:  # Print every 5 seconds
-                print(f"Camera 1 FPS: {monitor1.get_fps():.1f}")
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        streamer.stop()
-
-if __name__=="__main__":
-    main()
