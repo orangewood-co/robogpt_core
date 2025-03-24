@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=robogpt
-Comment=A app
-Exec=/home/aion/orangewood_ws/src/robogpt_v3/robogpt_bringup/scripts/run_app.sh
-Icon=/home/aion/orangewood_ws/src/robogpt_v3/robogpt_bringup/imgs/robot.png
-Terminal=false
-Type=Application
-Categories=Application;

@@ -14,7 +14,7 @@
   <!-- Run  a node from a package   -->
   <node 
       pkg="robogpt_agents" 
-      type="prompt.py" 
+      type="agent_init.py" 
       name="robogpt_agent_initalizer" 
       output="screen">
   </node>

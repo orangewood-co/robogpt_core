@@ -3,9 +3,9 @@
 import rospy
 
 from robogpt_perception import object_detection_implementation
-import set_realsense_sources
-import set_rgb_cam_sources
-import web_feed
+import set_realsense_sources as set_realsense_sources
+import set_rgb_cam_sources as set_rgb_cam_sources
+import web_feed as web_feed
 from vision_startup import VisionLauncher
 from get_world_context import ximg2xbase_implementation
 

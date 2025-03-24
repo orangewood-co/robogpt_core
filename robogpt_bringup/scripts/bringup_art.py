@@ -4,7 +4,6 @@ import pyfiglet
 import rospy
 
 rospy.init_node("bringup_art")
-
 def show(text):
     # Generate ASCII art
     welcome_art = pyfiglet.figlet_format(text)
