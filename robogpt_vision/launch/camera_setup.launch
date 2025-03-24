@@ -7,14 +7,14 @@
     <param name="comp_name" value="$(arg comp_name)"/>
 
     <!-- Launch stereo camera setup node only if 'type' is 'stereo' and 'comp_name' is 'intel' -->
-    <node pkg="robogpt_vision" type="run_set_realsense_sources.py" name="stereo_camera_setup" output="screen"
+    <node pkg="robogpt_vision" type="node_runner.py" name="stereo_camera_setup" output="screen"
           if="$(eval arg('type') == 'stereo' and arg('comp_name') == 'intel')">
       <param name="node_name" value="realsense_setup"/>
     </node>
 
 
     <!-- Launch RGB camera setup node only if 'type' is 'rgb' and 'comp_name' is 'intel' -->
-    <node pkg="robogpt_vision" type="run_set_rgb_cam_sources.py" name="rgb_camera_setup" output="screen"
+    <node pkg="robogpt_vision" type="node_runner.py" name="rgb_camera_setup" output="screen"
           if="$(eval arg('type') == 'rgb' and arg('comp_name') == 'intel')">
       <param name="node_name" value="rgb_setup"/>
     </node>

@@ -5,6 +5,7 @@ import json
 import pysher  
 import hmac
 import hashlib
+import pusher
 # Set up logging. Uncomment this for debugging.
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger(__name__)
@@ -64,6 +65,10 @@ class pusher_listener():
     def error_handler(self,data):
         """Handle Pusher errors"""
         print(f"Pusher Error: {data}")
+
+    def send_msg(self,message,user):
+        sender = pusher.Pusher(app_id=self.app_id, key=self.public_key, secret=self.secret, cluster=self.cluster)
+        sender.trigger('private-chat', 'evt::test', {'message': message,'userId': user})
 
     def connect_handler(self,data):
         """Handle when we successfully connect to Pusher"""

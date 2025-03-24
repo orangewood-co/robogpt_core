@@ -13,13 +13,16 @@ import rospkg
 import pusher
 import requests
 import subprocess
-import pusherclient
 from queue import Queue
 from urllib.parse import urlsplit, unquote
+from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
+from langchain.prompts import PromptTemplate
+from langchain.schema import SystemMessage, HumanMessage
 
 rospack = rospkg.RosPack()
 base_agent = rospack.get_path('robogpt_agents')
 sys.path.append(base_agent)
+robogpt_env_path = os.path.join(base_agent, "config", ".demo_env")
 ################################
 
 
@@ -54,16 +57,6 @@ def load_robot_poses(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)
 
-def send_msg(pusher_client, message):
-    """
-    Sends a message to a specified Pusher channel.
-
-    Args:
-        pusher_client: The Pusher client instance.
-        message (str): The message to send.
-    """
-    pusher_client.trigger('private-chat', 'evt::test', {'message': message})
-
 def load_env_variables(env_file):
     """
     Load environment variables from a .env file into os.environ.
@@ -88,8 +81,8 @@ def load_env_variables(env_file):
                 os.environ[key] = value
     
     return env_vars
-    
-def translate_text(key, endpoint, location, text_to_translate, to_language="en"):
+   
+def translate_text(key,endpoint,location,text_to_translate, to_language="en"):
     """
     Translates the given text to the specified language using Azure Translator.
 
@@ -222,3 +215,40 @@ def download_file(url, output_dir='~/'):
         print(f"HTTP error occurred: {http_err}")
     except Exception as err:
         print(f"An error occurred: {err}")
+
+def ai_formatted_msg(message: str) -> str:
+        """
+        Given an input message string, this method creates a prompt incorporating the current LLM model's name,
+        sends the prompt to ChatOpenAI for rephrasing, and returns the formatted (rephrased) string.
+        """
+        # Initializing important variables
+        keys = load_env_variables(robogpt_env_path)
+        pusher_client = pusher.Pusher(
+            app_id=keys['PUSHER_APP_ID'],
+            key=keys['NEXT_PUBLIC_PUSHER_KEY'],
+            secret=keys['PUSHER_SECRET'],
+            cluster=keys['NEXT_PUBLIC_PUSHER_CLUSTER']
+        )
+
+        llm = ChatOpenAI(
+            model=keys['AI_MODEL'],
+            temperature=keys['AI_TEMPERATURE'],
+            organization=keys['ORGANIZATION'],
+            openai_api_key=keys['OPENAI_API_KEY']
+        )
+        rephrase_template = PromptTemplate(
+            template=(
+                "Given that the current model is {llm_model}, please rephrase the following system message "
+                "to suit the style and capabilities of the model:\n\n"
+                "{message}"
+            ),
+            input_variables=["llm_model", "message"]
+        )
+        formatted_prompt = rephrase_template.format(
+            llm_model=keys['AI_MODEL'],
+            message=message
+        )
+        rephrased_response = llm([HumanMessage(content=formatted_prompt)])
+        msg_content = rephrased_response.content if hasattr(rephrased_response, "content") else str(rephrased_response)
+        # Send the message to the web app
+        return msg_content

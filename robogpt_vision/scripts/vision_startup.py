@@ -15,14 +15,6 @@ rospack = rospkg.RosPack()
 package_path = rospack.get_path('robogpt_vision')
 sys.path.append(package_path)
 
-# Try to import the object detection module
-try:
-    file_path = 'scripts.robogpt_perception'
-    object_detection = importlib.import_module(file_path)
-    object_detection = getattr(object_detection, 'ObjectDetectionImplementation')
-except Exception as err:
-    print("Could not load perception files due to ", err)
-
 class VisionLauncher:
     def __init__(self):
         self.process_camera_startup = None
@@ -58,16 +50,6 @@ class VisionLauncher:
             if process:  # Check if process exists before terminating
                 process.terminate()
                 time.sleep(delay)
-
-    def init_obj_detection(self, cam_name):
-        """
-        Initialize object detection for a given camera.
-
-        Args:
-            cam_name (str): The name of the camera.
-        """
-        obj_detection = object_detection(cam_name)
-        obj_detection._run()
 
     def check_realsense_cameras(self):
         """
