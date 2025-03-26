@@ -16,10 +16,6 @@ add_service_files(
   GetWorldContext.srv  
 )
 
-add_action_files(
-  FILES
-  RecordCamera.action
-)
 
 generate_messages(
   DEPENDENCIES
@@ -37,9 +33,6 @@ include_directories(
 )
 
 
-catkin_install_python(PROGRAMS
-  scripts/get_world_context.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+
 
 install(DIRECTORY config/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)

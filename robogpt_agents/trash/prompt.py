@@ -158,7 +158,7 @@ def main():
         model=keys['AI_MODEL'],
         temperature=keys['AI_TEMPERATURE'],
         organization=keys['ORGANIZATION'],
-        openai_api_key=keys['OPENAI_API_KEY'],
+        openai_api_key=os.environ.get('OPENAI_KEY'),
     )
     
     system_message = SystemMessage(

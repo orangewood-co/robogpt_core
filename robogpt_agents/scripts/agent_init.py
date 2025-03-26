@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import prompt #type: ignore
 import sys
 import traceback
 import logging
+import prompt  #type: ignore
 
 logging.basicConfig(
     level=logging.ERROR,

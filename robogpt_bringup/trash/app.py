@@ -172,15 +172,28 @@ class MainApp(QWidget):
 
         # Create and add 7 labeled dropdowns
         self.dropdowns = []
-        drop_labels = ["Robot Name", "Use Case", "Type", "Drivers", "Use Sim", "Enable Vision"]
+        drop_labels = ["Robot Name", "Skill Set", "Planner Type", "Additional Drivers", "Enable Simulation", "Enable Vision"]
         dropdown_options = [
-            ["owl65","ec63", "ec612", "owl68","ec66","tm5"],  
-            ["base", "pick_and_place", "archform", "gazebo_skills","sf_demo"],          
-            ["moveit", "description"],               
+            ["owl6.5", "owr63", "owr612", "owl6.8", "owr66", "techman5"],  # Updated display names
+            ["base","gazebo_skills"],          
+            ["moveit", "Internal"],               
             ["moveit", "robotiq", "both", "none"],        
             ["true", "false"],  
             ["false", "true"], 
         ]
+        
+        # Create mapping from display names to internal values for robot names
+        self.robot_name_mapping = {
+            "owl6.5": "owl65",
+            "owr63": "ec63",
+            "owr612": "ec612",
+            "owl6.8": "owl68",
+            "owr66": "ec66",
+            "techman5": "tm5"
+        }
+        self.planner_mapping = {
+            "Internal": "description"
+        }
 
         for i in range(len(drop_labels)):  # Use length of drop_labels
             label = QLabel(drop_labels[i])
@@ -201,19 +214,19 @@ class MainApp(QWidget):
             grid_layout.addWidget(label, row * 2, col)         # Label on top
             grid_layout.addWidget(dropdown, row * 2 + 1, col)  # Dropdown below label
         
-
+    
         # Buttons at the bottom
         button_layout = QHBoxLayout()
         # Open Config Button
-        self.open_config_button = QPushButton("Open Config File")
+        self.open_config_button = QPushButton("Vision Configuration")
         self.open_config_button.clicked.connect(self.open_config_dialog)
         self.open_config_button.pressed.connect(lambda: self.set_button_color(self.open_config_button, "#007BFF"))  # Blue
         self.open_config_button.released.connect(lambda: self.set_button_color(self.open_config_button, "#333333"))  # Original
         button_layout.addWidget(self.open_config_button)
 
         # Open App List Button
-        self.open_app_list_button = QPushButton("Open App List")
-        self.open_app_list_button.clicked.connect(self.open_app_list_with_popup)
+        self.open_app_list_button = QPushButton("Camera Setup")
+        self.open_app_list_button.clicked.connect(self.camera_setup)
         self.open_app_list_button.pressed.connect(lambda: self.set_button_color(self.open_app_list_button, "#007BFF"))  # Blue
         self.open_app_list_button.released.connect(lambda: self.set_button_color(self.open_app_list_button, "#333333"))  # Original
         button_layout.addWidget(self.open_app_list_button)
@@ -258,18 +271,19 @@ class MainApp(QWidget):
     def update_robot_ip(self):
         self.robot_ip = self.robot_ip_input.text()  # Save the current text input into the robot_ip variable
 
-    # Slot to update variable values based on dropdown selection
+# Slot to update variable values based on dropdown selection
     def update_dropdown_value(self, index):
         sender = self.sender()  # Get the dropdown that triggered the signal
         selected_text = sender.currentText()
 
         # Save the selected option to the corresponding variable
         if sender == self.dropdowns[0]:
-            self.robot_name = selected_text
+            # Map display name to internal value for robot name
+            self.robot_name = self.robot_name_mapping.get(selected_text, selected_text)
         elif sender == self.dropdowns[1]:
             self.use_case = selected_text
         elif sender == self.dropdowns[2]:
-            self.type = selected_text
+            self.type == self.planner_mapping.get(selected_text, selected_text)
         elif sender == self.dropdowns[3]:
             self.driver = selected_text
         elif sender == self.dropdowns[4]:
@@ -377,79 +391,6 @@ class MainApp(QWidget):
         dialog.setLayout(layout)
         dialog.exec()
 
-
-    # Methods
-    def open_app_list_with_popup(self):
-        # Load JSON file content dynamically using the specified path
-        use_cases = self.get_use_cases_from_json()
-
-        # Create a custom pop-up dialog
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Add a new skill")
-
-        # Enable the dialog to be movable and independent
-        dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
-
-        # Set the size of the popup
-        dialog.resize(400, 300)  # Width: 400px, Height: 300px
-
-        # Create layout for the dialog
-        layout = QVBoxLayout()
-
-        # Add a label above the dropdown
-        use_case_label = QLabel("Use Cases")
-        layout.addWidget(use_case_label)
-
-        # Add a dropdown for use cases
-        dropdown = QComboBox()
-        dropdown.addItems(use_cases)  # Populate the dropdown with use cases
-        layout.addWidget(dropdown)
-
-        # Add a label for the text input
-        skill_name_label = QLabel("Skill Name")
-        layout.addWidget(skill_name_label)
-
-        # Add a text input for skill name
-        skill_name_input = QLineEdit()
-        layout.addWidget(skill_name_input)
-
-        # Add a button to add a new skill to the selected use case
-        add_button = QPushButton("Add")
-        add_button.setStyleSheet("background-color: #333333; color: white; border: none;")
-
-        # Function to handle button press
-        def handle_add_button_click():
-            add_button.setStyleSheet("background-color: #007BFF; color: white; border: none;")  # Change color
-            QTimer.singleShot(300, lambda: self.add_skill_to_json(dialog, dropdown.currentText(), skill_name_input.text()))
-            QTimer.singleShot(500, lambda: add_button.setStyleSheet("background-color: #333333; color: white; border: none;"))  # Reset color with delay
-
-        add_button.pressed.connect(lambda: add_button.setStyleSheet("background-color: #007BFF; color: white; border: none;"))
-        add_button.released.connect(lambda: add_button.setStyleSheet("background-color: #333333; color: white; border: none;"))
-        add_button.clicked.connect(handle_add_button_click)
-        layout.addWidget(add_button)
-
-        # Add a "Check All" button
-        check_all_button = QPushButton("Check All")
-        check_all_button.setStyleSheet("background-color: #333333; color: white; border: none;")
-
-        # Function to handle button press
-        def handle_check_all_button_click():
-            check_all_button.setStyleSheet("background-color: #007BFF; color: white; border: none;")  # Change color
-            QTimer.singleShot(300, self.open_app_list)
-            QTimer.singleShot(500, lambda: check_all_button.setStyleSheet("background-color: #333333; color: white; border: none;"))  # Reset color with delay
-
-        check_all_button.pressed.connect(lambda: check_all_button.setStyleSheet("background-color: #007BFF; color: white; border: none;"))
-        check_all_button.released.connect(lambda: check_all_button.setStyleSheet("background-color: #333333; color: white; border: none;"))
-        check_all_button.clicked.connect(handle_check_all_button_click)
-        layout.addWidget(check_all_button)
-
-        # Set the dialog layout
-        dialog.setLayout(layout)
-
-        # Execute the dialog (this will block until the dialog is closed)
-        dialog.exec()
-
-
     def get_use_cases_from_json(self):
         # Read the JSON file and extract use cases
         try:
@@ -523,6 +464,17 @@ class MainApp(QWidget):
                 margin-top: 10px;
             }}
         """)
+
+    def camera_setup(self):
+        cam_setup = None  # Initialize variable before try block
+        try:
+            cam_setup = launch_with_delay('robogpt_vision camera_setup.launch',args=[],delay=3)
+            cam_setup.wait()
+        except Exception as e:
+            if cam_setup:  # Only try to close if it was successfully created
+                processes = [cam_setup]
+                close_with_delay(processes,5)
+            print("Could not setup camera due to ", e)
 
     def start_robogpt(self):
         # Print all the dropdown values when start button is pressed
